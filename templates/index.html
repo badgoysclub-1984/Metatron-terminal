@@ -516,10 +516,18 @@ async function sbOCR() {
       body: JSON.stringify({ prompt: 'read screen', session_id: sessionId })
     });
     const d = await res.json();
-    if (d.agent_result && d.agent_result.output && d.agent_result.output.text) {
-      respEl.textContent = "Captured Screen Text:\n" + d.agent_result.output.text;
+    
+    // Check various paths for OCR text
+    let ocrText = "";
+    if (d.agent_result) {
+      if (d.agent_result.output && d.agent_result.output.text) ocrText = d.agent_result.output.text;
+      else if (d.agent_result.text) ocrText = d.agent_result.text;
+    }
+    
+    if (ocrText) {
+      respEl.textContent = "Captured Screen Text:\n" + ocrText;
     } else {
-      respEl.textContent = d.llm_reply || d.result || "OCR capture complete.";
+      respEl.textContent = d.llm_reply || d.result || "OCR capture complete, but no text extracted.";
     }
   } catch(err) {
     respEl.textContent = "OCR Neural failure: " + err;
