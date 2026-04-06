@@ -119,6 +119,9 @@ log = logging.getLogger("metatron")
 # ═══════════════════════════════════════════════════════════════
 
 def create_app() -> Flask:
+    # ── Environment ────────────────────────────────────────────
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    
     app = Flask(__name__, template_folder="templates")
     app.config["JSON_SORT_KEYS"] = False
 
