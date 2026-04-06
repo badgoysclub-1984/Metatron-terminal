@@ -48,7 +48,7 @@ LOOP_DEV=$(losetup -P -f --show "$FINAL_IMG")
 echo "Mounted image at $LOOP_DEV"
 
 # Resize filesystem
-e2fsck -f "${LOOP_DEV}p2" || true
+e2fsck -fy "${LOOP_DEV}p2" || true
 resize2fs "${LOOP_DEV}p2"
 
 mkdir -p "$MNT_DIR"
