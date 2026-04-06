@@ -1,0 +1,36 @@
+# METATRON QUANTUM OS v3.1 — Python dependencies
+# Core
+torch>=2.3
+numpy
+psutil
+flask>=3.0
+
+# LLM routing
+ollama
+
+# ML / memory
+faiss-cpu
+sentence-transformers
+
+# Web scraping
+requests
+beautifulsoup4
+
+# Browser automation (optional)
+playwright
+
+# File utilities
+python-dotenv
+
+# QR code generation
+qrcode[pil]
+pillow
+
+# OCR (optional, for image-to-text)
+pytesseract
+
+# Training (optional, full mode)
+# datasets  # pip install datasets separately if using full training mode
+
+# Google Gemini CLI (optional assisted training)
+# google-generativeai
