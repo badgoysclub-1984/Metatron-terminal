@@ -582,10 +582,39 @@ function toggleFS(){ document.fullscreenElement ? document.exitFullscreen() : do
 function clearChat(){ E('chat-out').innerHTML = ''; }
 function showQR(){ window.open('/api/qr'); }
 
+async function loadApps(){
+  try {
+    const d = await (await fetch('/api/apps/list')).json();
+    E('apps-list').innerHTML = (d.apps||[]).map(a => `
+      <div class="btn-g" style="display:flex; flex-direction:column; align-items:center; padding:15px; text-align:center; height:80px; justify-content:center" onclick="launchApp('${a.id}')">
+        <span style="font-size:24px">${a.icon}</span>
+        <span style="font-size:10px; margin-top:5px; font-weight:900">${a.name}</span>
+      </div>
+    `).join('');
+  } catch(e) {}
+}
+
+async function launchApp(id){
+  try {
+    const res = await fetch('/api/apps/launch', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id})
+    });
+    const d = await res.json();
+    if(d.success) {
+      const chat = E('chat-out');
+      chat.innerHTML += `<div class="msg"><div class="msg-a">Launched ${d.name} successfully via ℤ₉ AppAgent.</div></div>`;
+      chat.scrollTop = chat.scrollHeight;
+    }
+  } catch(e) {}
+}
+
 // Init
 setInterval(refreshStatus, 3000);
 refreshStatus();
 navTo('/home/pi');
+loadApps();
 </script>
 </body>
 </html>
