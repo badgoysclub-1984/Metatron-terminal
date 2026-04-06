@@ -1,19 +1,19 @@
 {
-  "name": "METATRON DESKTOP",
-  "short_name": "Metatron",
-  "description": "ℤ₉ Agentic OS Terminal",
+  "name": "METATRON — OPTIMAL DESIGN SYSTEMS",
+  "short_name": "METATRON",
+  "description": "ℤ₉ Agentic AI Operating System by OPTIMAL DESIGN",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#060c0c",
+  "background_color": "#0d1117",
   "theme_color": "#00f0ff",
   "icons": [
     {
-      "src": "/api/qr?data=metatron_icon",
+      "src": "/static/logo.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/api/qr?data=metatron_icon",
+      "src": "/static/logo.png",
       "sizes": "512x512",
       "type": "image/png"
     }

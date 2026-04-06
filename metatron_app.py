@@ -36,18 +36,34 @@ class OverlayApp(QMainWindow):
         
         # Add a custom draggable title bar for the overlay
         self.title_bar = QWidget()
-        self.title_bar.setFixedHeight(24)
-        self.title_bar.setStyleSheet("background: rgba(0, 240, 255, 0.2); border-radius: 4px 4px 0 0;")
-        
-        tb_layout = QVBoxLayout(self.title_bar)
-        tb_layout.setContentsMargins(0, 0, 0, 0)
-        
+        self.title_bar.setFixedHeight(28)
+        self.title_bar.setStyleSheet("background: rgba(0, 0, 0, 0.8); border: 1px solid rgba(0, 240, 255, 0.5); border-radius: 6px 6px 0 0;")
+
+        from PyQt5.QtWidgets import QHBoxLayout, QLabel
+        tb_layout = QHBoxLayout(self.title_bar)
+        tb_layout.setContentsMargins(10, 0, 5, 0)
+
+        # Title Label
+        self.title_label = QLabel("🧿 METATRON OS — v3.1")
+        self.title_label.setStyleSheet("color: #00f0ff; font-weight: bold; font-size: 11px; letter-spacing: 1px;")
+        tb_layout.addWidget(self.title_label)
+
+        tb_layout.addStretch()
+
+        # Terminal button
+        self.term_btn = QPushButton("📟")
+        self.term_btn.setFixedSize(24, 24)
+        self.term_btn.setStyleSheet("color: #00f0ff; background: transparent; border: none; font-weight: bold; font-size: 14px;")
+        self.term_btn.clicked.connect(self.launch_terminal)
+        self.term_btn.setToolTip("Multi-Node Terminal")
+        tb_layout.addWidget(self.term_btn)
+
         # Close button
         self.close_btn = QPushButton("✕")
         self.close_btn.setFixedSize(24, 24)
-        self.close_btn.setStyleSheet("color: white; background: transparent; border: none; font-weight: bold;")
+        self.close_btn.setStyleSheet("color: #00f0ff; background: transparent; border: none; font-weight: bold; font-size: 14px;")
         self.close_btn.clicked.connect(self.close)
-        tb_layout.addWidget(self.close_btn, alignment=Qt.AlignRight)
+        tb_layout.addWidget(self.close_btn)
         
         layout.addWidget(self.title_bar)
         
@@ -61,6 +77,12 @@ class OverlayApp(QMainWindow):
         # Drag state
         self.dragging = False
         self.drag_position = QPoint()
+
+    def launch_terminal(self):
+        import subprocess
+        # Run metatron_terminal.py using the same python interpreter
+        script_path = os.path.join(os.path.dirname(__file__), "metatron_terminal.py")
+        subprocess.Popen([sys.executable, script_path])
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.LeftButton and self.title_bar.geometry().contains(event.pos()):

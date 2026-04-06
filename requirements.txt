@@ -4,6 +4,7 @@ torch>=2.3
 numpy
 psutil
 flask>=3.0
+paramiko
 
 # LLM routing
 ollama

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧿 METATRON TERMINAL — ℤ₉ MULTI-NODE</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css">
+<script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+<style>
+:root{
+  --neon:#00f0ff;--neon-dim:rgba(0, 240, 255, 0.3);--bg:#010409;--border:#30363d;
+}
+body{background:var(--bg);color:#c9d1d9;font-family:monospace;overflow:hidden;height:100vh;display:flex;flex-direction:column}
+.terminal-pane{background:#000;border:1px solid var(--border);border-radius:4px;overflow:hidden;display:flex;flex-direction:column}
+.pane-header{background:#161b22;padding:4px 10px;font-size:11px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.pane-content{flex:1;padding:5px}
+.neon-text{color:var(--neon);text-shadow:0 0 5px rgba(0,240,255,0.5)}
+.btn-neon{border:1px solid var(--neon-dim);color:var(--neon);padding:2px 8px;font-size:10px;border-radius:3px;cursor:pointer}
+.btn-neon:hover{background:rgba(0,240,255,0.1);border-color:var(--neon)}
+</style>
+</head>
+<body>
+
+<div class="p-4 border-b border-gray-800 flex justify-between items-center bg-[#0d1117]">
+    <div class="flex items-center gap-4">
+        <h1 class="text-xl font-black tracking-widest neon-text">METATRON TERMINAL v3.1</h1>
+        <div class="h-6 w-px bg-gray-700"></div>
+        <div id="layout-ctrl" class="flex gap-2">
+            <button class="btn-neon" onclick="setLayout(1)">1x1</button>
+            <button class="btn-neon" onclick="setLayout(2)">2x1</button>
+            <button class="btn-neon" onclick="setLayout(4)">2x2</button>
+        </div>
+    </div>
+    <div class="flex gap-4 text-xs">
+        <span id="node-count">NODES: 4</span>
+        <span class="neon-text">ℤ₉ CONSENSUS: STABLE</span>
+    </div>
+</div>
+
+<div id="terminal-grid" class="flex-1 p-4 grid gap-4 grid-cols-2 grid-rows-2">
+    <!-- Panes will be injected here -->
+</div>
+
+<script>
+const grid = document.getElementById('terminal-grid');
+const panes = [];
+
+function createPane(id) {
+    const div = document.createElement('div');
+    div.className = 'terminal-pane';
+    div.id = `pane-${id}`;
+    div.innerHTML = `
+        <div class="pane-header">
+            <span class="neon-text font-bold">NODE ${id}: DISCONNECTED</span>
+            <div class="flex gap-2">
+                <input id="ip-${id}" type="text" placeholder="IP: 192.168.1.56" class="bg-black border border-gray-700 text-[10px] px-2 py-0.5 outline-none focus:border-[#00f0ff]">
+                <button class="btn-neon" onclick="connectNode(${id})">CONNECT</button>
+            </div>
+        </div>
+        <div class="pane-content" id="xterm-${id}"></div>
+    `;
+    grid.appendChild(div);
+
+    const term = new Terminal({
+        theme: { background: '#000000', foreground: '#00f0ff', cursor: '#00f0ff' },
+        fontSize: 12,
+        fontFamily: 'monospace',
+        cursorBlink: true
+    });
+    const fitAddon = new FitAddon.FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(document.getElementById(`xterm-${id}`));
+    fitAddon.fit();
+
+    panes.push({ id, term, fitAddon });
+
+    term.onData(data => {
+        // Handle input (would send to backend via websocket/api)
+        // For now just echo or send to a mock API
+        console.log(`Node ${id} input:`, data);
+    });
+}
+
+function setLayout(n) {
+    grid.className = 'flex-1 p-4 grid gap-4';
+    if (n === 1) {
+        grid.classList.add('grid-cols-1', 'grid-rows-1');
+        panes.forEach((p, i) => document.getElementById(`pane-${p.id}`).style.display = i === 0 ? 'flex' : 'none');
+    } else if (n === 2) {
+        grid.classList.add('grid-cols-2', 'grid-rows-1');
+        panes.forEach((p, i) => document.getElementById(`pane-${p.id}`).style.display = i < 2 ? 'flex' : 'none');
+    } else {
+        grid.classList.add('grid-cols-2', 'grid-rows-2');
+        panes.forEach(p => document.getElementById(`pane-${p.id}`).style.display = 'flex');
+    }
+    setTimeout(() => panes.forEach(p => p.fitAddon.fit()), 100);
+}
+
+for (let i = 1; i <= 4; i++) createPane(i);
+setLayout(4);
+
+async function connectNode(id) {
+    const ip = document.getElementById(`ip-${id}`).value || '192.168.1.56';
+    const header = document.querySelector(`#pane-${id} .pane-header .neon-text`);
+    header.textContent = `NODE ${id}: CONNECTING to ${ip}...`;
+    
+    // In a real app, you'd call a backend API that uses paramiko
+    // and pipe the output back via SSE or WebSockets.
+    // For this build, we'll simulate the connection success.
+    setTimeout(() => {
+        header.textContent = `NODE ${id}: CONNECTED to ${ip}`;
+        panes[id-1].term.writeln(`\r\n\x1b[32mMetatron Terminal ℤ₉ — Connection established to ${ip}\x1b[0m`);
+        panes[id-1].term.write(`pi@node-${id}:~$ `);
+    }, 1500);
+}
+
+window.addEventListener('resize', () => panes.forEach(p => p.fitAddon.fit()));
+</script>
+</body>
+</html>

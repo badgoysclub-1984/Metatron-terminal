@@ -67,6 +67,26 @@ class VectorMemory:
         return _text_hash_vector(text, self.dim)
 
     # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
+    def batch_add(self, entries: List[Dict[str, Any]], skip_save: bool = False):
+        """Add multiple memories in a single pass (efficient for loading)."""
+        texts = [e["text"] for e in entries]
+        metas = [e.get("metadata", {}) for e in entries]
+        
+        if self.encoder is not None:
+            embs = self.encoder.encode(texts, batch_size=32, show_progress_bar=False).astype(np.float32)
+        else:
+            embs = np.stack([_text_hash_vector(t, self.dim) for t in texts])
+
+        if self.index is not None:
+            self.index.add(embs)
+            
+        for emb, text, meta in zip(embs, texts, metas):
+            self.memories.append((emb, text, meta))
+            
+        if self.persist_path and not skip_save:
+            self._save(self.persist_path)
+
     def add(self, text: str, metadata: Dict[str, Any], skip_save: bool = False):
         emb = self._encode(text)
         if self.index is not None:
@@ -127,10 +147,8 @@ class VectorMemory:
             if not raw_text.strip():
                 return
             data = json.loads(raw_text)
-            print(f"[VectorMemory] Loading {len(data)} entries...")
-            for entry in data:
-                # Add without re-saving to disk
-                self.add(entry["text"], entry.get("metadata", {}), skip_save=True)
+            print(f"[VectorMemory] Loading {len(data)} entries via batch_add...")
+            self.batch_add(data, skip_save=True)
         except Exception as exc:
             print(f"[VectorMemory] Warning: could not load memories: {exc}")
 

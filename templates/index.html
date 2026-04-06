@@ -3,163 +3,176 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>METATRON DESKTOP · Pi 500</title>
+<title>METATRON — OPTIMAL DESIGN SYSTEMS</title>
+<meta name="description" content="METATRON by OPTIMAL DESIGN — Agentic Transformer Desktop v3.1">
+<link rel="icon" type="image/png" href="/static/logo.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
 <style>
 :root{
-  --neon:#00f0ff;--neon-dim:#007f8a;--bg:#000000;--panel:#000000;
-  --border:#00f0ff;--text:#00f0ff;--dim:#007f8a;--ok:#00ff88;--err:#ff4466;
-  --amber:#fbbf24;--cyan:#22d3ee;--violet:#a78bfa;--green:#34d399;
+  --neon:#00f0ff;--neon-dim:rgba(0, 240, 255, 0.3);--bg:#0d1117;--panel:#161b22;
+  --border:#30363d;--text:#c9d1d9;--dim:#8b949e;--ok:#238636;--err:#f85149;
+  --amber:#d29922;--cyan:#39c5bb;--violet:#8957e5;--green:#3fb950;
+  --glitch-1: #ff00ea; --glitch-2: #00f0ff;
+  --github-black: #010409;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:transparent}
-body{color:var(--text);font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;display:flex;flex-direction:column;background:#000}
+html,body{height:100%;overflow:hidden;background:var(--github-black)}
+body{color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";display:flex;flex-direction:column;
+  background-image: radial-gradient(circle at center, #0d1117 0%, #010409 100%);
+}
+
+/* ── Branding ── */
+.brand-text{
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  background: linear-gradient(90deg, #fff, var(--neon), #fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: shine 4s linear infinite;
+  font-weight: 900;
+}
+@keyframes shine { to { background-position: 200% center; } }
 
 /* ── Toolbar ── */
-.toolbar{background:linear-gradient(to bottom, #0a1212, #000000);border-bottom:2px solid var(--neon);height:54px;
-  display:flex;align-items:center;padding:0 12px;gap:14px;flex-shrink:0;
-  box-shadow:0 4px 20px rgba(0,0,0,0.8), 0 0 15px rgba(0,240,255,0.15);z-index:50;overflow:hidden}
-.neon{color:var(--neon);text-shadow:0 0 12px rgba(0,240,255,.8)}
-.tb-sep{width:1px;height:24px;background:var(--border);flex-shrink:0}
+.toolbar{background: rgba(1, 4, 9, 0.95); border-bottom:1px solid var(--border);height:70px;
+  display:flex;align-items:center;padding:0 20px;gap:20px;flex-shrink:0;
+  box-shadow:0 0 30px rgba(0,0,0,0.5); z-index:50; backdrop-filter: blur(10px);}
+.neon{color:var(--neon);text-shadow:0 0 8px rgba(0,240,255,0.6)}
+.tb-sep{width:1px;height:30px;background:var(--border);flex-shrink:0}
 
 /* ── Input bar ── */
-.input-bar{background:#000;border-bottom:1px solid var(--border);
-  padding:8px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0;
-  box-shadow: inset 0 2px 10px rgba(0,240,255,0.05)}
-.prompt-input{flex:1;background:#050505;color:var(--text);border:1px solid var(--neon-dim);
-  border-radius:4px;padding:8px 14px;font-family:inherit;font-size:13px;outline:none;
-  transition:border-color .2s, box-shadow .2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5)}
-.prompt-input:focus{border-color:var(--neon);box-shadow:0 0 12px rgba(0,240,255,.3)}
-.btn{background:var(--neon);color:#000;border:none;padding:6px 16px;border-radius:4px;
-  cursor:pointer;font-weight:700;font-family:inherit;font-size:12px;
-  transition:all .15s;white-space:nowrap; box-shadow: 0 0 10px rgba(0,240,255,0.2)}
-.btn:hover{opacity:.85; box-shadow: 0 0 15px rgba(0,240,255,0.4)}.btn:disabled{opacity:.35;cursor:default}
-.btn-g{background:transparent;color:var(--neon);border:1px solid var(--neon-dim);padding:5px 10px;
-  border-radius:4px;cursor:pointer;font-family:inherit;font-size:11px;transition:all .15s}
-.btn-g:hover{border-color:var(--neon);background:rgba(0,240,255,.1)}
+.input-bar{background:rgba(2,5,5,0.95);border-bottom:1px solid var(--border);
+  padding:10px 15px;display:flex;align-items:center;gap:12px;flex-shrink:0;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5)}
+.prompt-input{flex:1;background:#000;color:var(--text);border:1px solid var(--neon-dim);
+  border-radius:4px;padding:10px 16px;font-size:14px;outline:none;
+  transition:all .3s ease; box-shadow: inset 0 0 10px rgba(0,240,255,0.05)}
+.prompt-input:focus{border-color:var(--neon);box-shadow:0 0 15px rgba(0,240,255,0.2), inset 0 0 5px rgba(0,240,255,0.1)}
+
+.btn{background:var(--neon);color:#000;border:none;padding:8px 20px;border-radius:4px;
+  cursor:pointer;font-weight:800;font-size:13px;
+  transition:all .2s;white-space:nowrap; box-shadow: 0 0 15px rgba(0,240,255,0.3)}
+.btn:hover{filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 0 20px rgba(0,240,255,0.5)}
+.btn-g{background:transparent;color:var(--neon);border:1px solid var(--neon-dim);padding:6px 12px;
+  border-radius:4px;cursor:pointer;font-size:11px;transition:all .2s}
+.btn-g:hover{border-color:var(--neon);background:rgba(0,240,255,.1);box-shadow: 0 0 10px rgba(0,240,255,0.2)}
 
 /* ── Grid ── */
-.panel-grid{flex:1;display:grid;grid-template-columns:260px 1fr 310px;
-  gap:10px;padding:10px;overflow:hidden;min-height:0; background: #000}
+.panel-grid{flex:1;display:grid;grid-template-columns:280px 1fr 340px;
+  gap:12px;padding:12px;overflow:hidden;min-height:0}
 
 /* ── Panel ── */
-.panel{background:rgba(2,5,5,0.98);border:1px solid var(--neon-dim);border-radius:6px;
+.panel{background:rgba(2,10,10,0.92);border:1px solid var(--neon-dim);border-radius:8px;
   display:flex;flex-direction:column;overflow:hidden;
-  box-shadow:0 8px 32px rgba(0,0,0,0.9), inset 0 0 10px rgba(0,240,255,0.05);
-  transition: border-color 0.3s ease;
+  box-shadow:0 10px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,240,255,0.03);
+  backdrop-filter: blur(4px);
 }
-.panel:hover{border-color: var(--neon)}
-.ph{background:linear-gradient(to right, #050a0a, #000);border-bottom:1px solid var(--border);padding:8px 12px;
-  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;font-size:12px;
-  color: var(--neon); font-weight: bold; text-shadow: 0 0 5px rgba(0,240,255,0.3)}
+.panel:hover{border-color: var(--neon); box-shadow:0 10px 45px rgba(0,240,255,0.05)}
+.ph{background:linear-gradient(to right, #051515, #000);border-bottom:1px solid var(--border);padding:10px 15px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;font-size:13px;
+  color: var(--neon); font-weight: 800; letter-spacing: 0.5px}
 
 /* ── Chat ── */
-#chat-out{flex:1;overflow-y:auto;padding:12px 16px;font-size:13px;line-height:1.8;scroll-behavior:smooth;
-  background-image: radial-gradient(circle at center, #051010 0%, #000000 100%);
+#chat-out{flex:1;overflow-y:auto;padding:15px 20px;font-size:14px;line-height:1.7;scroll-behavior:smooth;
+  background-image: radial-gradient(circle at 10% 10%, #051515 0%, #000000 100%);
 }
-.msg{margin-bottom:12px;animation:fadein .18s ease}
-@keyframes fadein{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
-.msg-u{color:var(--neon);font-size:13px;margin-bottom:3px; text-shadow: 0 0 5px rgba(0,240,255,0.3)}
-.msg-u::before{content:"⚡ "}
-.msg-a{color:var(--text);white-space:pre-wrap;word-break:break-word}
-.msg-a::before{content:"🧿 ";color:var(--neon)}
-.msg-a code{background:#001111;color:#00f0ff;padding:1px 5px;border-radius:3px;font-size:12px}
-.msg-a pre{background:#000000;border:1px solid var(--neon-dim);border-radius:4px;padding:10px;
-  margin:10px 0;overflow-x:auto;font-size:11px;line-height:1.6;color:#00f0ff;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 2px 8px rgba(0,240,255,0.1)}
-.msg-a pre code{background:none;padding:0;color:inherit}
+.msg{margin-bottom:15px; animation: slideUp .25s ease-out}
+@keyframes slideUp { from{opacity:0; transform: translateY(10px)} to{opacity:1; transform: translateY(0)} }
+.msg-u{color:var(--neon);font-size:14px;margin-bottom:5px; font-weight: 700; text-shadow: 0 0 5px rgba(0,240,255,0.4)}
+.msg-u::before{content:"[USER] "; opacity: 0.7}
+.msg-a{color:var(--text);white-space:pre-wrap;word-break:break-word; border-left: 2px solid var(--neon-dim); padding-left: 12px}
+.msg-a::before{content:"[METATRON] "; color:var(--neon); font-weight: 900}
+.msg-a code{background:rgba(0,30,30,0.8);color:#00f0ff;padding:2px 6px;border-radius:3px;font-size:13px; border: 1px solid var(--neon-dim)}
+.msg-a pre{background:#000000;border:1px solid var(--neon-dim);border-radius:6px;padding:12px;
+  margin:12px 0;overflow-x:auto;font-size:12px;line-height:1.6;color:#00f0ff;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.9)}
 
 /* ── Tab system ── */
-.tab-bar{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto; background: #000}
-.tab-btn{padding:10px 16px;font-size:11px;cursor:pointer;border-bottom:3px solid transparent;
-  transition:all .2s;color:var(--dim);white-space:nowrap;flex-shrink:0; font-weight: bold}
-.tab-btn.active{color:var(--neon);border-bottom-color:var(--neon); background: rgba(0,240,255,0.05);
-  text-shadow: 0 0 8px rgba(0,240,255,0.5)}
+.tab-bar{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:rgba(0,0,0,0.5)}
+.tab-btn{padding:12px 18px;font-size:11px;cursor:pointer;border-bottom:3px solid transparent;
+  transition:all .3s;color:var(--dim);white-space:nowrap;font-weight: 900; text-transform: uppercase}
+.tab-btn.active{color:var(--neon);border-bottom-color:var(--neon); background: rgba(0,240,255,0.08);
+  text-shadow: 0 0 10px rgba(0,240,255,0.6)}
 
 /* ── Monitor ── */
-.mbar{height:6px;background:#111;border-radius:3px;overflow:hidden;margin-top:4px; border: 1px solid #222}
-.mfill{height:100%;border-radius:3px;transition:width .5s ease; box-shadow: 0 0 8px var(--neon)}
+.mbar{height:8px;background:#001111;border-radius:4px;overflow:hidden;margin-top:5px; border: 1px solid #003333}
+.mfill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(0.1, 0.7, 1.0, 0.1); 
+  box-shadow: 0 0 10px var(--neon); filter: brightness(1.2)}
 
 /* ── Terminal ── */
-.terminal-box{flex:1;overflow-y:auto;font-size:11px;line-height:1.6;padding:10px;
-  color:#00f0ff;background:#000000;border-radius:4px;border:1px solid var(--neon-dim);
-  min-height:200px;font-family:'Courier New',monospace;
-  box-shadow: inset 0 2px 10px rgba(0,0,0,0.8)}
-.t-cmd{color:var(--neon);margin-top:6px; font-weight: bold}.t-out{color:#007f8a}.t-err{color:#ff7788}
-.sh-in{width:100%;background:#000000;color:var(--neon);border:1px solid var(--neon-dim);
-  padding:6px 10px;font-family:monospace;font-size:11px;border-radius:3px;outline:none;
-  box-shadow: inset 0 1px 4px rgba(0,0,0,1)}
-.sh-in:focus{border-color:var(--neon); box-shadow: 0 0 8px rgba(0,240,255,0.2)}
+.terminal-box{flex:1;overflow-y:auto;font-size:12px;line-height:1.5;padding:12px;
+  color:#00f0ff;background:#000;border-radius:6px;border:1px solid var(--neon-dim);
+  min-height:220px;font-family:'Consolas', monospace;
+  box-shadow: inset 0 0 20px rgba(0,0,0,1)}
+.t-cmd{color:var(--neon);margin-top:8px; font-weight: 800}.t-out{color:#00adb5; opacity: 0.9}.t-err{color:#ff5e6c}
 
 /* ── Status bar ── */
-.status-bar{background:linear-gradient(to top, #050a0a, #000);border-top:1px solid var(--border);padding:4px 12px;
-  display:flex;align-items:center;gap:16px;font-size:10px;color:var(--dim);
-  flex-shrink:0;overflow:hidden;height:24px; box-shadow: 0 -4px 10px rgba(0,0,0,0.5)}
+.status-bar{background: #000; border-top:1px solid var(--border);padding:6px 15px;
+  display:flex;align-items:center;gap:20px;font-size:11px;color:var(--dim);
+  flex-shrink:0;height:30px; box-shadow: 0 -10px 20px rgba(0,0,0,0.8)}
 
 /* ── File browser ── */
-.fi:hover{background:rgba(0,240,255,0.08); border-radius: 4px}
-.fi.dir{color:var(--neon); font-weight: bold}
+.fi{padding: 5px 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px}
+.fi:hover{background:rgba(0,240,255,0.1); border-radius: 4px; color: #fff}
+.fi.dir{color:var(--neon); font-weight: 800}
 
 /* ── Scrollbars ── */
-::-webkit-scrollbar {width: 6px; height: 6px}
+::-webkit-scrollbar {width: 8px; height: 8px}
 ::-webkit-scrollbar-track {background: #000}
-::-webkit-scrollbar-thumb {background: var(--neon-dim); border-radius: 3px}
+::-webkit-scrollbar-thumb {background: var(--neon-dim); border-radius: 4px; border: 2px solid #000}
 ::-webkit-scrollbar-thumb:hover {background: var(--neon)}
 </style>
 </head>
 <body>
 <div class="toolbar">
-  <img src="/static/logo.png" style="height: 40px; margin-right: -5px; filter: drop-shadow(0 0 5px var(--neon));">
-  <div style="display: flex; flex-direction: column; justify-content: center;">
-    <span class="neon" style="font-size:18px;letter-spacing:1px;font-weight:900;line-height:1">METATRON OS</span>
-    <span style="font-size:8px;color:var(--dim);letter-spacing:1px;font-weight:700">BY OPTIMAL DESIGN</span>
-  </div>
+  <a href="https://optimaldesignsystems.com" target="_blank" style="text-decoration: none; display: flex; align-items: center; gap: 15px;">
+    <img src="/static/logo.png" style="height: 54px; filter: drop-shadow(0 0 10px var(--neon));">
+    <div style="display: flex; flex-direction: column; justify-content: center;">
+      <span class="brand-text" style="font-size:24px;line-height:1">METATRON</span>
+      <span style="font-size:10px;color:var(--neon);letter-spacing:1px;font-weight:800; opacity: 0.9">OPTIMAL DESIGN SYSTEMS</span>
+    </div>
+  </a>
 
   <div class="tb-sep"></div>
 
   <!-- CPU / RAM bars -->
-  <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;width:80px">
-    <div class="mrow" style="margin:0"><span style="color:var(--amber);font-size:10px" id="tb-cpu">CPU --%</span></div>
+  <div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;width:90px">
+    <div class="mrow" style="margin:0; display: flex; justify-content: space-between;"><span style="color:var(--amber);font-size:10px; font-weight: 800" id="tb-cpu">CPU</span> <span id="cpu-pct" style="font-size:10px; color:var(--amber)">--%</span></div>
     <div class="mbar"><div class="mfill" id="cpu-fill" style="background:var(--amber);width:0%"></div></div>
   </div>
-  <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;width:80px">
-    <div class="mrow" style="margin:0"><span style="color:var(--cyan);font-size:10px" id="tb-ram">RAM --%</span></div>
+  <div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;width:90px">
+    <div class="mrow" style="margin:0; display: flex; justify-content: space-between;"><span style="color:var(--cyan);font-size:10px; font-weight: 800" id="tb-ram">RAM</span> <span id="ram-pct" style="font-size:10px; color:var(--cyan)">--%</span></div>
     <div class="mbar"><div class="mfill" id="ram-fill" style="background:var(--cyan);width:0%"></div></div>
   </div>
 
-  <span style="font-size:11px;flex-shrink:0" id="tb-temp">🌡 --°C</span>
+  <span style="font-size:12px;font-weight: 800" id="tb-temp">🌡 --°C</span>
 
   <div class="tb-sep"></div>
 
   <!-- Network -->
-  <div style="display:flex;align-items:center;gap:5px;cursor:pointer;flex-shrink:0"
+  <div style="display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0"
        onclick="showNetworkInfo()">
-    <div id="net-dot" style="width:7px;height:7px;border-radius:50%;background:#444;flex-shrink:0"></div>
-    <span style="font-size:11px" id="net-ip">—</span>
-  </div>
-
-  <!-- PiConnect -->
-  <div style="display:flex;align-items:center;gap:5px;cursor:pointer;flex-shrink:0"
-       onclick="showPiConnect()" title="PiConnect nodes">
-    <span style="font-size:11px">🔗</span>
-    <span style="font-size:10px" id="tb-nodes">nodes: —</span>
+    <div id="net-dot" style="width:8px;height:8px;border-radius:50%;background:#444; box-shadow: 0 0 5px #000"></div>
+    <span style="font-size:12px; font-weight: 800" id="net-ip">—</span>
   </div>
 
   <div class="tb-sep"></div>
 
   <!-- Optimizer status -->
-  <span style="font-size:10px;flex-shrink:0" id="tb-opt">🧿 OPT: —</span>
+  <span style="font-size:11px;font-weight: 800" id="tb-opt">🧿 OPT: —</span>
 
   <div style="flex:1"></div>
 
   <!-- Model selector -->
   <select id="model-sel"
-    style="background:var(--panel);color:var(--neon);border:1px solid var(--neon-dim);
-           border-radius:3px;font-family:monospace;font-size:10px;padding:2px 5px;
-           cursor:pointer;flex-shrink:0">
+    style="background:#000;color:var(--neon);border:1px solid var(--neon-dim);
+           border-radius:4px;font-family:monospace;font-size:11px;padding:3px 8px;
+           cursor:pointer;flex-shrink:0; font-weight: 800">
     <option value="auto">auto-route</option>
     <option value="gemma_abl">gemma-abliterated</option>
     <option value="qwen_coder">qwen-coder</option>
@@ -168,30 +181,29 @@ body{color:var(--text);font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-se
   </select>
 
   <!-- QR code -->
-  <button class="btn-icon" onclick="showQR()" title="QR code for this page">⬜</button>
+  <button class="btn-g" style="padding: 4px 8px" onclick="showQR()" title="QR code">QR</button>
 
   <!-- Clock -->
-  <span id="tb-clock" class="neon" style="font-size:12px;flex-shrink:0;font-variant-numeric:tabular-nums"></span>
+  <span id="tb-clock" class="neon" style="font-size:14px;flex-shrink:0;font-variant-numeric:tabular-nums; font-weight: 900"></span>
 
   <!-- Fullscreen -->
-  <button class="btn-icon" onclick="toggleFS()" title="Fullscreen">⛶</button>
+  <button class="btn-g" style="padding: 4px 8px" onclick="toggleFS()" title="Fullscreen">⛶</button>
 </div>
 
 <!-- ═══ INPUT BAR ═══ -->
-<div class="input-bar" style="position:relative">
+<div class="input-bar">
   <div id="upload-bar"></div>
-  <input id="prompt" class="prompt-input" placeholder="Speak or type a prompt…"
+  <input id="prompt" class="prompt-input" placeholder="Enter command or speak to METATRON BY OPTIMAL DESIGN…"
          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendPrompt()}">
-  <button id="voice-btn" onclick="toggleVoice()" title="Voice input">🎤</button>
-
-  <!-- Upload file button -->
-  <label style="cursor:pointer" title="Upload file to current directory">
-    <input type="file" id="file-upload" style="display:none" onchange="uploadFile(this)">
-    <span class="btn-g btn-sm">📤</span>
-  </label>
-
-  <button id="send-btn" class="btn" onclick="sendPrompt()">SEND → ℤ₉</button>
-  <button class="btn-g btn-sm" onclick="clearChat()" title="Clear chat">✕ Clear</button>
+  
+  <div style="display:flex; gap: 8px">
+    <button id="voice-btn" class="btn-g" onclick="toggleVoice()" title="Voice input">🎤</button>
+    <label style="cursor:pointer" title="Upload file">
+      <input type="file" id="file-upload" style="display:none" onchange="uploadFile(this)">
+      <span class="btn-g">📤</span>
+    </label>
+    <button id="send-btn" class="btn" onclick="sendPrompt()">DISPATCH → ℤ₉</button>
+  </div>
 </div>
 
 <!-- ═══ 3-COLUMN GRID ═══ -->
@@ -200,51 +212,45 @@ body{color:var(--text);font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-se
   <!-- ── LEFT: File Browser ── -->
   <div class="panel">
     <div class="ph">
-      <span class="neon" style="font-size:11px">📁 Files</span>
-      <div style="display:flex;gap:3px;align-items:center">
-        <button class="btn-icon" onclick="navTo(homeDir())" title="Home">⌂</button>
-        <button class="btn-icon" onclick="navTo('/')" title="Root">/</button>
-        <button class="btn-icon" onclick="refreshFiles()" title="Refresh">⟳</button>
-        <button class="btn-icon" onclick="newFile()" title="New file">+📄</button>
-        <button class="btn-icon" onclick="newFolder()" title="New folder">+📂</button>
+      <span>📁 ARCHIVE</span>
+      <div style="display:flex;gap:5px;align-items:center">
+        <button class="btn-g" style="padding:2px 6px" onclick="navTo(homeDir())">⌂</button>
+        <button class="btn-g" style="padding:2px 6px" onclick="refreshFiles()">⟳</button>
+        <button class="btn-g" style="padding:2px 6px" onclick="newFile()">+📄</button>
       </div>
     </div>
-    <div class="breadcrumb" id="bc">…</div>
-    <div class="file-list" id="file-list"><div style="padding:12px;color:var(--dim)">Loading…</div></div>
-    <div id="file-status" style="padding:3px 9px;font-size:10px;color:var(--dim);
-         border-top:1px solid var(--border);flex-shrink:0">—</div>
+    <div id="bc" style="padding: 6px 12px; font-size: 11px; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(0,240,255,0.1)">…</div>
+    <div id="file-list" style="flex:1; overflow-y:auto"></div>
+    <div id="file-status" style="padding:5px 12px;font-size:10px;color:var(--dim);
+         border-top:1px solid rgba(0,240,255,0.1);background:rgba(0,0,0,0.5)">—</div>
 
     <!-- Preview pane -->
-    <div id="preview-sec">
-      <div class="ph" style="height:26px">
-        <span id="prev-path" style="font-size:10px;color:var(--dim);overflow:hidden;white-space:nowrap;flex:1">—</span>
-        <button class="btn-icon" onclick="closePreview()" style="font-size:10px">✕</button>
+    <div id="preview-sec" style="max-height: 40%; border-top: 1px solid var(--neon); display: flex; flex-direction: column">
+      <div class="ph" style="height:28px; background: #000">
+        <span id="prev-path" style="font-size:10px; flex:1; overflow:hidden">preview</span>
+        <button class="btn-g" style="padding:1px 5px" onclick="closePreview()">✕</button>
       </div>
-      <div id="file-prev"></div>
+      <div id="file-prev" style="padding:10px; font-size:11px; overflow-y:auto; white-space:pre-wrap; background: #000; flex:1"></div>
     </div>
   </div>
 
   <!-- ── CENTER: Chat ── -->
   <div class="panel">
     <div class="ph">
-      <span class="neon">🧠 METATRON — ℤ₉ Quantum Chat</span>
-      <div style="display:flex;align-items:center;gap:7px">
-        <span id="model-tag" style="font-size:10px;color:var(--dim)">auto</span>
-        <div id="stream-dot" style="display:none;width:7px;height:7px;border-radius:50%;
-             background:var(--neon);animation:vp 1s infinite"></div>
-        <button class="btn-icon btn-sm" onclick="toggleHistory()" title="Session memory">🕐</button>
+      <span>🧠 CORE INTELLIGENCE — ℤ₉ DISCRETE GAUGE</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div id="stream-dot" style="display:none;width:8px;height:8px;border-radius:50%;
+             background:var(--neon);box-shadow: 0 0 10px var(--neon); animation: pulse 1s infinite"></div>
+        <button class="btn-g" style="padding:2px 6px" onclick="clearChat()">CLEAR</button>
       </div>
     </div>
     <div id="chat-out">
       <div class="msg">
-        <div class="msg-a" style="font-weight:700; color:var(--neon)">METATRON OS by OPTIMAL DESIGN — v3.1</div>
-        <div class="msg-a">ℤ₉ agents: File(0) · Browser(3) · App(6) · System(0) · Screen(3)
-Golden Triadic Self-Optimizer: {0,3,6} hive-mind active
-LLMs: Gemma4-abliterated · Qwen2.5-Coder · DeepSeek (charge-routed)
-─────────────────────────────────────────────────────
-Prompts pass through digital_root_9 neutrality filter.
-Examples: "read screen" · "type 'hello world'" · "list /home"
-          "status" · "screenshot"</div>
+        <div class="msg-a" style="font-weight:900; color:var(--neon)">METATRON OS by OPTIMAL DESIGN · v3.1</div>
+        <div class="msg-a">Systems: ℤ₉ Core / Golden Triadic Hive-Mind / Vector Memory
+Charge Distribution: File(0) · Browser(3) · App(6) · System(0)
+Status: Consensus established. Ready for dispatch.
+─────────────────────────────────────────────────────</div>
       </div>
     </div>
   </div>
@@ -252,166 +258,67 @@ Examples: "read screen" · "type 'hello world'" · "list /home"
   <!-- ── RIGHT: Monitor / Terminal / Optimizer ── -->
   <div class="panel">
     <div class="tab-bar">
-      <div class="tab-btn active" onclick="switchTab('monitor')">📊 Monitor</div>
-      <div class="tab-btn" onclick="switchTab('terminal')">💻 Shell</div>
-      <div class="tab-btn" onclick="switchTab('optimizer')">🧿 Opt</div>
-      <div class="tab-btn" onclick="switchTab('memory')">🧬 Mem</div>
+      <div class="tab-btn active" onclick="switchTab('monitor')">Monitor</div>
+      <div class="tab-btn" onclick="switchTab('terminal')">Shell</div>
+      <div class="tab-btn" onclick="switchTab('optimizer')">Z9-Opt</div>
+      <div class="tab-btn" onclick="switchTab('memory')">Memory</div>
     </div>
 
     <!-- Monitor tab -->
-    <div class="tab-pane active" id="tab-monitor">
-      <div style="display:flex;flex-direction:column;gap:8px;font-size:11px">
-
+    <div class="tab-pane active" id="tab-monitor" style="padding: 15px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display:flex;flex-direction:column;gap:12px">
         <div>
-          <div class="mrow"><span style="color:var(--amber)">CPU</span><span id="m-cpu" style="color:var(--amber)">--%</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:800; color:var(--amber)"><span>CPU UTILIZATION</span> <span id="m-cpu">--%</span></div>
           <div class="mbar"><div class="mfill" id="m-cpu-f" style="background:var(--amber);width:0%"></div></div>
         </div>
         <div>
-          <div class="mrow"><span style="color:var(--cyan)">Memory</span><span id="m-ram" style="color:var(--cyan)">--</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:800; color:var(--cyan)"><span>PHYSICAL MEMORY</span> <span id="m-ram">--</span></div>
           <div class="mbar"><div class="mfill" id="m-ram-f" style="background:var(--cyan);width:0%"></div></div>
         </div>
         <div>
-          <div class="mrow"><span style="color:var(--violet)">Disk</span><span id="m-disk" style="color:var(--violet)">--%</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:800; color:var(--violet)"><span>DISK STORAGE</span> <span id="m-disk">--%</span></div>
           <div class="mbar"><div class="mfill" id="m-disk-f" style="background:var(--violet);width:0%"></div></div>
         </div>
 
-        <hr class="sep">
+        <div style="height:1px; background:rgba(0,240,255,0.1); margin: 5px 0"></div>
 
-        <div class="kv">
-          <div class="kv-item"><span>Temperature</span><span id="m-temp" class="neon">--</span></div>
-          <div class="kv-item"><span>Uptime</span><span id="m-up">--</span></div>
-          <div class="kv-item"><span>Cores</span><span id="m-cores">--</span></div>
-          <div class="kv-item"><span>Freq</span><span id="m-freq">--</span></div>
-          <div class="kv-item"><span>Load 1m</span><span id="m-load">--</span></div>
-          <div class="kv-item"><span>LLM latency</span><span id="m-llm-lat">--</span></div>
-          <div class="kv-item"><span>Memories</span><span id="m-mems">--</span></div>
-          <div class="kv-item"><span>Disk free</span><span id="m-dsk-free">--</span></div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size:11px">
+          <div style="color:var(--dim)">Temperature: <span id="m-temp" class="neon">--</span></div>
+          <div style="color:var(--dim)">Uptime: <span id="m-up">--</span></div>
+          <div style="color:var(--dim)">Cores: <span id="m-cores">--</span></div>
+          <div style="color:var(--dim)">Freq: <span id="m-freq">--</span></div>
         </div>
 
-        <hr class="sep">
-
-        <div style="color:var(--dim);font-size:10px">ℤ₉ LIVE PARAMETERS</div>
-        <div class="kv">
-          <div class="kv-item"><span>ε (epsilon)</span><span id="m-eps" style="color:var(--green)">0.22</span></div>
-          <div class="kv-item"><span>λ_HΦ</span><span id="m-lam" style="color:var(--green)">0.70</span></div>
-          <div class="kv-item"><span>Task success</span><span id="m-succ" style="color:var(--ok)">--%</span></div>
-          <div class="kv-item"><span>Consensus</span><span id="m-cons" style="color:var(--dim)">--</span></div>
+        <div style="background: rgba(0,240,255,0.03); padding: 10px; border-radius: 4px; border: 1px solid rgba(0,240,255,0.1)">
+          <div style="font-size:10px; color:var(--dim); margin-bottom: 5px">ℤ₉ GAUGE PARAMETERS</div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size:10px">
+            <div>ε: <span id="m-eps" style="color:var(--green)">--</span></div>
+            <div>λ_HΦ: <span id="m-lam" style="color:var(--green)">--</span></div>
+            <div>Success: <span id="m-succ" style="color:var(--ok)">--%</span></div>
+            <div>Consensus: <span id="m-cons">--</span></div>
+          </div>
         </div>
-
-        <button class="btn-g btn-sm" style="margin-top:auto;align-self:flex-start"
-                onclick="refreshStatus()">⟳ Refresh</button>
       </div>
     </div>
 
-    <!-- Shell tab -->
-    <div class="tab-pane" id="tab-terminal">
-      <div style="display:flex;gap:10px;flex:1;min-height:0">
-        
-        <!-- LOCAL -->
-        <div style="flex:1;display:flex;flex-direction:column;min-width:0">
-          <div class="term-label">Local Shell (charge 0)</div>
-          <div id="terminal-out" class="terminal-box">
-            <span class="t-out">METATRON Local — Z9 SystemAgent · ShellGuard active</span>
-          </div>
-          <div style="display:flex;gap:4px;margin-top:5px;flex-shrink:0">
-            <input id="sh-in" class="sh-in" placeholder="local command…"
-                   onkeydown="handleShellKey(event)">
-            <button class="btn-g btn-sm" onclick="runShell()">▶</button>
-            <button class="btn-icon btn-sm" onclick="clearTerminal()" title="Clear">✕</button>
-          </div>
+    <!-- Other tabs (Terminal, Opt, Memory) -->
+    <div class="tab-pane" id="tab-terminal" style="padding: 10px; flex:1; display:flex; flex-direction:column">
+        <div id="terminal-out" class="terminal-box"></div>
+        <div style="display:flex; gap: 5px; margin-top: 8px">
+            <input id="sh-in" class="sh-in" style="flex:1; background:#000; border:1px solid var(--neon-dim); color:var(--neon); padding: 5px 10px; font-family:monospace; font-size:12px" placeholder="Execute command…" onkeydown="handleShellKey(event)">
+            <button class="btn-g" onclick="runShell()">RUN</button>
         </div>
-
-        <!-- NETWORK -->
-        <div style="flex:1;display:flex;flex-direction:column;min-width:0">
-          <div class="term-label">Network Node (ℤ₉ Discrete Gauge)</div>
-          <div id="terminal-out-net" class="terminal-box">
-            <span class="t-out">METATRON Network — Waiting for node selection…</span>
-          </div>
-          <div style="display:flex;gap:4px;margin-top:5px;flex-shrink:0">
-            <select id="net-node-select" class="btn-sm" style="background:#000000;color:var(--dim);border:1px solid var(--neon-dim);max-width:80px;font-size:9px"
-                    onchange="updateNetTarget()">
-              <option value="">(None)</option>
-            </select>
-            <input id="sh-in-net" class="sh-in" placeholder="network command…"
-                   onkeydown="handleNetKey(event)">
-            <button class="btn-g btn-sm" onclick="runNetShell()">▶</button>
-            <button class="btn-icon btn-sm" onclick="clearNetTerminal()" title="Clear">✕</button>
-          </div>
-        </div>
-
-      </div>
-      <div style="font-size:10px;color:var(--dim);margin-top:3px">
-        ↑↓ history · Enter to run · ShellGuard active · Connect to peers via PiConnect
-      </div>
+    </div>
+    
+    <div class="tab-pane" id="tab-optimizer" style="padding: 15px; flex:1; display:flex; flex-direction:column">
+        <div style="font-size:11px; color:var(--dim); margin-bottom: 10px">HIVE-MIND STATE</div>
+        <div id="opt-status" style="font-size:14px; font-weight:900; margin-bottom: 10px">--</div>
+        <canvas id="opt-chart" width="280" height="80" style="width:100%; border:1px solid var(--neon-dim); background:#000"></canvas>
     </div>
 
-    <!-- Optimizer tab -->
-    <div class="tab-pane" id="tab-optimizer">
-      <div style="font-size:11px;display:flex;flex-direction:column;gap:7px">
-        <div style="color:var(--dim);font-size:10px">🧿 GOLDEN TRIADIC HIVE-MIND</div>
-
-        <div class="kv">
-          <div class="kv-item"><span>Status</span><span id="opt-status" style="color:var(--ok)">—</span></div>
-          <div class="kv-item"><span>Step</span><span id="opt-steps">—</span></div>
-          <div class="kv-item"><span>Last error</span><span id="opt-err" class="neon">—</span></div>
-          <div class="kv-item"><span>History</span><span id="opt-hlen">—</span></div>
-        </div>
-
-        <div style="color:var(--dim);font-size:10px;margin-top:2px">MASTER OPERATORS</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
-          <div style="background:#080f0f;padding:7px;border-radius:3px;text-align:center;border:1px solid var(--border)">
-            <div class="neon" style="font-size:16px;font-weight:700">0</div>
-            <div style="color:var(--dim);font-size:9px">charge</div>
-          </div>
-          <div style="background:#080f0f;padding:7px;border-radius:3px;text-align:center;border:1px solid var(--border)">
-            <div class="neon" style="font-size:16px;font-weight:700">3</div>
-            <div style="color:var(--dim);font-size:9px">charge</div>
-          </div>
-          <div style="background:#080f0f;padding:7px;border-radius:3px;text-align:center;border:1px solid var(--border)">
-            <div class="neon" style="font-size:16px;font-weight:700">6</div>
-            <div style="color:var(--dim);font-size:9px">charge</div>
-          </div>
-        </div>
-
-        <div style="color:var(--dim);font-size:10px">LIVE CONFIG</div>
-        <div class="kv">
-          <div class="kv-item"><span>ε</span><span id="op-eps">0.22</span></div>
-          <div class="kv-item"><span>λ_HΦ</span><span id="op-lam">0.70</span></div>
-          <div class="kv-item"><span>noise_amp</span><span id="op-noise">0.15</span></div>
-          <div class="kv-item"><span>retro_str</span><span id="op-retro">0.10</span></div>
-        </div>
-
-        <div style="color:var(--dim);font-size:10px">PERFORMANCE</div>
-        <canvas id="opt-chart" width="260" height="54"
-          style="width:100%;background:#000000;border-radius:3px;border:1px solid var(--neon-dim)"></canvas>
-
-        <button class="btn-g btn-sm" onclick="refreshOptimizer()">⟳ Refresh</button>
-      </div>
-    </div>
-
-    <!-- Memory tab -->
-    <div class="tab-pane" id="tab-memory">
-      <div style="display:flex;flex-direction:column;gap:7px;font-size:11px">
-        <div style="color:var(--dim);font-size:10px">🧬 VECTOR MEMORY (FAISS)</div>
-        <div class="kv">
-          <div class="kv-item"><span>Stored</span><span id="mem-count">—</span></div>
-          <div class="kv-item"><span>Session</span><span id="mem-session" style="color:var(--green)">—</span></div>
-        </div>
-        <div style="display:flex;gap:5px">
-          <input id="mem-q" style="flex:1;background:#080e0e;color:var(--text);
-            border:1px solid var(--border);border-radius:3px;padding:4px 8px;
-            font-family:monospace;font-size:11px;outline:none"
-            placeholder="Recall query…" onkeydown="if(event.key==='Enter')recallMemory()">
-          <button class="btn-g btn-sm" onclick="recallMemory()">Recall</button>
-        </div>
-        <div id="mem-results" style="font-size:11px;color:var(--dim)">—</div>
-        <hr class="sep">
-        <div style="color:var(--dim);font-size:10px">CONVERSATION HISTORY</div>
-        <button class="btn-g btn-sm" onclick="clearHistory()" style="align-self:flex-start">
-          ✕ Clear session history
-        </button>
-        <div id="hist-status" style="font-size:10px;color:var(--dim)">—</div>
-      </div>
+    <div class="tab-pane" id="tab-memory" style="padding: 15px; flex:1; display:flex; flex-direction:column">
+        <input id="mem-q" class="prompt-input" style="width:100%; margin-bottom: 10px" placeholder="Search memory…" onkeydown="if(event.key==='Enter')recallMemory()">
+        <div id="mem-results" style="font-size:11px; color:var(--dim)"></div>
     </div>
   </div>
 
@@ -419,549 +326,137 @@ Examples: "read screen" · "type 'hello world'" · "list /home"
 
 <!-- ═══ STATUS BAR ═══ -->
 <div class="status-bar">
-  <span id="sb-agent">Agent: —</span>
-  <span id="sb-charge">Charge: —</span>
-  <span id="sb-consensus">Consensus: —</span>
-  <span id="sb-eps">ε: 0.22</span>
+  <span style="color:var(--neon);font-weight:900;letter-spacing:1px;margin-right:20px">OPTIMALDESIGNSYSTEMS.COM</span>
+  <span id="sb-agent">AGENT: IDLE</span>
+  <span id="sb-charge">CHARGE: 0</span>
+  <span id="sb-consensus">CONSENSUS: STABLE</span>
   <span style="flex:1"></span>
-  <span id="sb-net" style="color:var(--dim)">—</span>
-  <span id="sb-ts" style="color:#2a3a3a"></span>
+  <span id="sb-net" style="color:var(--neon); font-weight: 800">METATRON v3.1 ONLINE</span>
+  <span id="sb-ts"></span>
 </div>
 
 <!-- ═══ CONTEXT MENU ═══ -->
-<div id="ctx-menu">
-  <div class="ctx-item" onclick="ctxOpen()">📂 Open / Preview</div>
-  <div class="ctx-item" onclick="ctxSendToChat()">💬 Ask METATRON about</div>
-  <div class="ctx-sep"></div>
-  <div class="ctx-item" onclick="ctxRename()">✏️ Rename</div>
-  <div class="ctx-item danger" onclick="ctxDelete()">🗑 Delete</div>
+<div id="ctx-menu" style="display:none; position:fixed; background:#000; border:1px solid var(--neon); color:var(--neon); z-index:1000; font-size:12px; box-shadow: 0 0 15px rgba(0,240,255,0.3)">
+  <div style="padding: 8px 15px; cursor:pointer" onclick="ctxOpen()">Open</div>
+  <div style="padding: 8px 15px; cursor:pointer" onclick="ctxDelete()">Delete</div>
 </div>
 
-<!-- ═══ JAVASCRIPT ═══ -->
 <script>
 "use strict";
-// ── State ─────────────────────────────────────────────────────
-let curPath        = '/home/pi';
-let ctxTarget      = null;   // { name, path, isDir }
-let isListening    = false;
-let recognition    = null;
-let isBusy         = false;
-let sessionId      = 'session-' + Date.now();
-let shHistory      = [];     // shell command history
-let shHistIdx      = -1;
+let curPath = '/home/pi';
+let ctxTarget = null;
+let isBusy = false;
+let sessionId = 'session-' + Date.now();
+const E = id => document.getElementById(id);
 
-// ── Clock ─────────────────────────────────────────────────────
 function tick(){
   const n=new Date(), p=x=>String(x).padStart(2,'0');
-  const day=n.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'});
-  E('tb-clock').textContent=`${day} ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+  E('tb-clock').textContent=`${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
 }
 setInterval(tick,1000); tick();
 
-// ── Home dir heuristic ────────────────────────────────────────
-function homeDir(){
-  const ip=E('net-ip').textContent;
-  // On a Pi the user is usually 'pi'; on other Linux 'ubuntu' etc.
-  // We start with /home/pi and fall back automatically if missing.
-  return '/home/pi';
-}
-
-// ── Status polling ────────────────────────────────────────────
 async function refreshStatus(){
-  try{
-    const d=await fetchJ('/api/status');
-    const cpu=d.cpu_percent||0, ram=d.memory_percent||0, disk=d.disk_percent||0;
-    E('tb-cpu').textContent=`CPU ${cpu.toFixed(0)}%`;
-    E('cpu-fill').style.width=cpu+'%';
-    E('tb-ram').textContent=`RAM ${ram.toFixed(0)}%`;
-    E('ram-fill').style.width=ram+'%';
-    E('tb-temp').textContent=`🌡 ${d.temperature||'--'}°C`;
-    E('m-cpu').textContent=cpu.toFixed(1)+'%'; E('m-cpu-f').style.width=cpu+'%';
-    E('m-ram').textContent=`${d.memory_used_mb||'--'}/${d.memory_total_mb||'--'} MB`;
-    E('m-ram-f').style.width=ram+'%';
-    E('m-disk').textContent=disk.toFixed(1)+'%'; E('m-disk-f').style.width=disk+'%';
-    E('m-temp').textContent=(d.temperature||'--')+(d.temperature!='N/A'?'°C':'');
-    E('m-up').textContent=fmtUptime(d.uptime_s||0);
-    E('m-cores').textContent=d.cpu_count||'--';
-    E('m-freq').textContent=d.cpu_freq_mhz?d.cpu_freq_mhz+' MHz':'--';
-    E('m-load').textContent=d.load_avg?d.load_avg[0].toFixed(2):'--';
-    E('m-mems').textContent=d.memory_count||0;
-    E('m-dsk-free').textContent=d.disk_free_gb!=null?d.disk_free_gb+'GB':'--';
-    if(d.llm) E('m-llm-lat').textContent=d.llm.avg_latency?d.llm.avg_latency.toFixed(2)+'s':'--';
+  try {
+    const d = await (await fetch('/api/status')).json();
+    E('cpu-pct').textContent = d.cpu_percent.toFixed(0) + '%';
+    E('cpu-fill').style.width = d.cpu_percent + '%';
+    E('ram-pct').textContent = d.memory_percent.toFixed(0) + '%';
+    E('ram-fill').style.width = d.memory_percent + '%';
+    E('tb-temp').textContent = `🌡 ${d.temperature}°C`;
+    
+    E('m-cpu').textContent = d.cpu_percent.toFixed(1) + '%';
+    E('m-cpu-f').style.width = d.cpu_percent + '%';
+    E('m-ram').textContent = `${d.memory_used_mb}MB / ${d.memory_total_mb}MB`;
+    E('m-ram-f').style.width = d.memory_percent + '%';
+    E('m-disk').textContent = d.disk_percent.toFixed(1) + '%';
+    E('m-disk-f').style.width = d.disk_percent + '%';
+    E('m-temp').textContent = d.temperature + '°C';
+    E('m-up').textContent = Math.floor(d.uptime_s/3600) + 'h ' + Math.floor((d.uptime_s%3600)/60) + 'm';
+    E('m-cores').textContent = d.cpu_count;
+    E('m-freq').textContent = d.cpu_freq_mhz + ' MHz';
+    
     if(d.z9){
-      E('m-eps').textContent=(d.z9.epsilon||.22).toFixed(4);
-      E('m-lam').textContent=(d.z9.lambda_hphi||.7).toFixed(4);
-      E('m-succ').textContent=((d.z9.task_success_rate||1)*100).toFixed(1)+'%';
-      E('m-cons').textContent=d.z9.consensus_count||0;
-      E('sb-eps').textContent=`ε: ${(d.z9.epsilon||.22).toFixed(4)}`;
+        E('m-eps').textContent = d.z9.epsilon.toFixed(4);
+        E('m-lam').textContent = d.z9.lambda_hphi.toFixed(4);
+        E('m-succ').textContent = (d.z9.task_success_rate * 100).toFixed(1) + '%';
+        E('m-cons').textContent = d.z9.consensus_count;
     }
-    if(d.optimizer){
-      const run=d.optimizer.running;
-      E('tb-opt').textContent=`🧿 OPT: ${run?'ACTIVE':'IDLE'}`;
-      E('tb-opt').style.color=run?'var(--green)':'var(--dim)';
-    }
-    E('sb-ts').textContent=new Date().toLocaleTimeString();
-    E('mem-count').textContent=d.memory_count||0;
-    E('mem-session').textContent=sessionId.slice(-8);
-  }catch(e){console.warn('status:',e)}
+    
+    E('net-ip').textContent = d.ip || '127.0.0.1';
+    E('net-dot').style.background = d.ip ? 'var(--ok)' : '#444';
+    E('tb-opt').textContent = `🧿 OPT: ${d.optimizer?.running ? 'ACTIVE' : 'IDLE'}`;
+    E('tb-opt').style.color = d.optimizer?.running ? 'var(--ok)' : 'var(--dim)';
+    
+  } catch(e) {}
 }
 
-async function refreshNetwork(){
-  try{
-    const d=await fetchJ('/api/network');
-    E('net-ip').textContent=d.ip||'offline';
-    E('net-dot').style.background=d.connected?'var(--green)':'var(--err)';
-    const kB=x=>(x/1024).toFixed(0)+'K';
-    E('sb-net').textContent=d.connected?`↑${kB(d.bytes_sent)} ↓${kB(d.bytes_recv)}`:'offline';
-  }catch(e){}
-}
-
-async function refreshPiConnect(){
-  try{
-    const d=await fetchJ('/api/piconnect');
-    E('tb-nodes').textContent=`nodes: ${d.online||1}`;
-  }catch(e){}
-}
-
-// ── File browser ──────────────────────────────────────────────
 async function navTo(path){
-  if(!path)return;
-  curPath=path;
-  hideCtxMenu();
-  try{
-    const d=await fetchJ(`/api/files/list?path=${enc(path)}`);
-    if(d.error){
-      // If /home/pi doesn't exist, fall back to home
-      if(path==='/home/pi'){await navTo('/home');return}
-      setFileList(`<div style="padding:12px;color:var(--err);font-size:12px">⚠ ${esc(d.error)}</div>`);
-      return;
-    }
-    // Breadcrumb
-    E('bc').innerHTML=(d.breadcrumb||[]).map((b,i,arr)=>
-      `<span class="bc-item" onclick="navTo('${b.full}')">${esc(b.name)}</span>`+
-      (i<arr.length-1?`<span style="color:var(--border)"> / </span>`:'')
-    ).join('');
-
-    const items=d.items||[];
-    if(!items.length){
-      setFileList('<div style="padding:12px;color:var(--dim);font-size:12px">(empty directory)</div>');
-    } else {
-      setFileList(items.map(it=>{
-        const isDir=it.type==='dir';
-        const icon=isDir?'📂':fileIcon(it.name);
-        const sz=it.size!=null?`<span class="fi-size">${fmtSize(it.size)}</span>`:'';
-        const fp=(path+'/'+it.name).replace(/\/\//g,'/');
-        return `<div class="fi ${isDir?'dir':'file'}" 
-                  data-path="${esc(fp)}" data-name="${esc(it.name)}" data-dir="${isDir}"
-                  onclick="${isDir?`navTo('${fp.replace(/'/g,"\\'")}')`:``}"
-                  ondblclick="${!isDir?`previewFile('${fp.replace(/'/g,"\\'")}')`:``}"
-                  oncontextmenu="showCtxMenu(event,'${fp.replace(/'/g,"\\'")}','${it.name.replace(/'/g,"\\'")}',${isDir})">
-                  ${icon} <span class="fi-name">${esc(it.name)}</span>${sz}
-                </div>`;
-      }).join(''));
-    }
-    E('file-status').textContent=`${items.length} items · ${d.path||path}`;
-  }catch(e){setFileList(`<div style="padding:12px;color:var(--err)">Connection error</div>`)}
+  curPath = path;
+  try {
+    const d = await (await fetch(`/api/files/list?path=${encodeURIComponent(path)}`)).json();
+    if(d.error){ if(path === '/home/pi') navTo('/home'); return; }
+    E('bc').textContent = d.path;
+    E('file-list').innerHTML = (d.items||[]).map(it => `
+      <div class="fi ${it.type==='dir'?'dir':''}" onclick="${it.type==='dir'?`navTo('${path}/${it.name}')`:`previewFile('${path}/${it.name}')`}">
+        ${it.type==='dir'?'📂':'📄'} ${it.name}
+      </div>
+    `).join('');
+    E('file-status').textContent = `${d.items.length} items in ${d.path}`;
+  } catch(e) {}
 }
-
-function setFileList(html){E('file-list').innerHTML=html}
-function refreshFiles(){navTo(curPath)}
 
 async function previewFile(path){
-  try{
-    const d=await fetchJ(`/api/files/preview?path=${enc(path)}&max=50000`);
-    E('prev-path').textContent=path.split('/').pop();
-    E('file-prev').textContent=d.error?`Error: ${d.error}`:(d.content||'(empty)');
-    if(d.truncated) E('file-prev').textContent+='… [truncated]';
-    E('preview-sec').classList.add('open');
-  }catch(e){}
-}
-function closePreview(){E('preview-sec').classList.remove('open')}
-
-async function newFile(){
-  const name=prompt('New file name:');
-  if(!name)return;
-  const p=curPath.replace(/\/$/,'')+'/'+name;
-  await postJ('/api/files/write',{path:p,content:''});
-  refreshFiles();
+    const d = await (await fetch(`/api/files/preview?path=${encodeURIComponent(path)}`)).json();
+    E('prev-path').textContent = path;
+    E('file-prev').textContent = d.content || '(empty)';
 }
 
-async function newFolder(){
-  const name=prompt('New folder name:');
-  if(!name)return;
-  const p=curPath.replace(/\/$/,'')+'/'+name;
-  await postJ('/api/files/mkdir',{path:p});
-  refreshFiles();
-}
+function closePreview(){ E('file-prev').textContent = ''; E('prev-path').textContent = 'preview'; }
 
-async function uploadFile(input){
-  const file=input.files[0]; if(!file)return;
-  const dest=curPath.replace(/\/$/,'')+'/'+file.name;
-  const bar=E('upload-bar');
-  bar.style.transform='scaleX(0)';
-  const text=await file.text();
-  bar.style.transform='scaleX(.5)';
-  await postJ('/api/files/write',{path:dest,content:text});
-  bar.style.transform='scaleX(1)';
-  setTimeout(()=>bar.style.transform='scaleX(0)',600);
-  refreshFiles();
-  input.value='';
-}
-
-// ── Context menu ──────────────────────────────────────────────
-function showCtxMenu(evt,path,name,isDir){
-  evt.preventDefault(); evt.stopPropagation();
-  ctxTarget={path,name,isDir};
-  const m=E('ctx-menu');
-  m.style.display='block';
-  m.style.left=(Math.min(evt.clientX,window.innerWidth-160))+'px';
-  m.style.top=(Math.min(evt.clientY,window.innerHeight-160))+'px';
-}
-function hideCtxMenu(){E('ctx-menu').style.display='none';ctxTarget=null}
-document.addEventListener('click',hideCtxMenu);
-
-function ctxOpen(){
-  if(!ctxTarget)return;
-  if(ctxTarget.isDir) navTo(ctxTarget.path);
-  else previewFile(ctxTarget.path);
-  hideCtxMenu();
-}
-
-function ctxSendToChat(){
-  if(!ctxTarget)return;
-  E('prompt').value=`Explain or analyse the file: ${ctxTarget.path}`;
-  sendPrompt();
-  hideCtxMenu();
-}
-
-async function ctxRename(){
-  if(!ctxTarget)return;
-  const newName=prompt(`Rename "${ctxTarget.name}" to:`,ctxTarget.name);
-  if(!newName||newName===ctxTarget.name){hideCtxMenu();return}
-  try{
-    await postJ('/api/files/rename',{src:ctxTarget.path,dst:newName});
-    refreshFiles();
-  }catch(e){alert('Rename failed: '+e.message)}
-  hideCtxMenu();
-}
-
-async function ctxDelete(){
-  if(!ctxTarget)return;
-  if(!confirm(`Delete "${ctxTarget.name}"? This cannot be undone.`)){hideCtxMenu();return}
-  try{
-    await postJ('/api/files/delete',{path:ctxTarget.path});
-    refreshFiles();
-    closePreview();
-  }catch(e){alert('Delete failed: '+e.message)}
-  hideCtxMenu();
-}
-
-// ── Chat / prompt ─────────────────────────────────────────────
 async function sendPrompt(){
-  const inp=E('prompt');
-  const prompt=inp.value.trim();
-  if(!prompt||isBusy)return;
-  const model=E('model-sel').value;
-  inp.value='';
-  appendUser(prompt);
-  E('send-btn').disabled=true;
-  isBusy=true;
-  E('model-tag').textContent=model==='auto'?'auto-routing':model;
-  E('stream-dot').style.display='block';
-
-  const msgDiv=document.createElement('div'); msgDiv.className='msg';
-  const aiDiv=document.createElement('div'); aiDiv.className='msg-a loading-cursor';
-  aiDiv.textContent='';
-  msgDiv.appendChild(aiDiv);
-  E('chat-out').appendChild(msgDiv);
-  scrollChat();
-
-  try{
-    const resp=await fetch('/api/execute',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt,model,session_id:sessionId})
-    });
-    if(!resp.ok)throw new Error('HTTP '+resp.status);
-    const data=await resp.json();
-
-    // Agent context bar
-    if(data.agent_result){
-      const ar=data.agent_result, r=ar.result||{};
-      E('sb-agent').textContent=`Agent: ${ar.agent||'?'}`;
-      E('sb-charge').textContent=`Charge: ${ar.charge!=null?ar.charge:'?'}`;
-      E('sb-consensus').textContent=`Consensus: ${ar.charge_neutral?'✓ ok':'✗'}`;
-
-      let summary='';
-      if(r.listing) summary=`📁 ${Array.isArray(r.listing)?r.listing.length:0} items in ${r.path||ar.agent}`;
-      else if(r.content) summary=`📄 ${r.content.substring(0,160)}${r.content.length>160?'…':''}`;
-      else if(r.stdout)  summary=`💻 ${r.stdout.substring(0,160)}`;
-      else if(r.error)   summary=`❌ ${r.error}`;
-      else if(r.warning) summary=`⚠ ${r.warning}`;
-      else if(r.message) summary=r.message;
-      else summary=JSON.stringify(r).substring(0,160);
-
-      const ctxDiv=document.createElement('div');
-      ctxDiv.className=`msg-ctx ${r.success?'ok':'err'}`;
-      ctxDiv.textContent=`[${ar.agent} · charge ${ar.charge||0}] ${summary}`;
-      msgDiv.insertBefore(ctxDiv,aiDiv);
-    }
-
-    const reply=data.llm_reply||'';
-    aiDiv.classList.remove('loading-cursor');
-    renderReply(aiDiv, reply || '[No LLM response — ensure Ollama is running]');
-
-  }catch(e){
-    aiDiv.classList.remove('loading-cursor');
-    aiDiv.textContent=`[Error: ${e.message}]`;
-    aiDiv.style.color='var(--err)';
-  }
-
-  E('stream-dot').style.display='none';
-  E('send-btn').disabled=false;
-  isBusy=false;
-  scrollChat();
+    const inp = E('prompt');
+    const prompt = inp.value.trim();
+    if(!prompt || isBusy) return;
+    isBusy = true;
+    inp.value = '';
+    const chat = E('chat-out');
+    chat.innerHTML += `<div class="msg"><div class="msg-u">${prompt}</div></div>`;
+    chat.scrollTop = chat.scrollHeight;
+    
+    E('stream-dot').style.display = 'block';
+    try {
+        const r = await fetch('/api/execute', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({prompt, session_id: sessionId})
+        });
+        const d = await r.json();
+        chat.innerHTML += `<div class="msg"><div class="msg-a">${d.llm_reply || '...'}</div></div>`;
+        if(d.agent_result){
+            E('sb-agent').textContent = `AGENT: ${d.agent_result.agent}`;
+            E('sb-charge').textContent = `CHARGE: ${d.agent_result.charge}`;
+            E('sb-consensus').textContent = d.agent_result.charge_neutral ? 'CONSENSUS: STABLE' : 'CONSENSUS: UNSTABLE';
+        }
+    } catch(e) {}
+    E('stream-dot').style.display = 'none';
+    isBusy = false;
+    chat.scrollTop = chat.scrollHeight;
 }
 
-function renderReply(el, text){
-  // Code blocks
-  let html=esc(text);
-  html=html.replace(/```(\w*)\n?([\s\S]*?)```/g,(_,lang,code)=>
-    `<pre><code>${code.trim()}</code></pre>`);
-  // Inline code
-  html=html.replace(/`([^`]+)`/g,'<code>$1</code>');
-  el.innerHTML=html;
-  // KaTeX
-  if((text.includes('$')||text.includes('\\('))&&window.renderMathInElement){
-    try{renderMathInElement(el,{
-      delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},
-                  {left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}],
-      throwOnError:false
-    })}catch(e){}
-  }
-}
-
-function appendUser(text){
-  const d=document.createElement('div'); d.className='msg';
-  d.innerHTML=`<div class="msg-u">${esc(text)}</div>`;
-  E('chat-out').appendChild(d); scrollChat();
-}
-function scrollChat(){const c=E('chat-out');c.scrollTop=c.scrollHeight}
-function clearChat(){
-  E('chat-out').innerHTML='<div class="msg"><div class="msg-a">Chat cleared.</div></div>';
-}
-function toggleHistory(){
-  E('prompt').value=''; // could add a history overlay
-  switchTab('memory');
-  E('mem-session').textContent=sessionId.slice(-8);
-  E('hist-status').textContent=`Session: ${sessionId}`;
-}
-
-// ── Shell tab ─────────────────────────────────────────────────
-function handleShellKey(evt){
-  if(evt.key==='Enter'){runShell();return}
-  if(evt.key==='ArrowUp'){
-    shHistIdx=Math.min(shHistIdx+1,shHistory.length-1);
-    if(shHistory[shHistIdx])E('sh-in').value=shHistory[shHistIdx];
-    return;
-  }
-  if(evt.key==='ArrowDown'){
-    shHistIdx=Math.max(shHistIdx-1,-1);
-    E('sh-in').value=shHistIdx>=0?(shHistory[shHistIdx]||''):'';
-  }
-}
-
-async function runShell(){
-  const inp=E('sh-in');
-  const cmd=inp.value.trim(); if(!cmd)return;
-  inp.value=''; shHistory.unshift(cmd); shHistIdx=-1;
-  if(shHistory.length>50)shHistory.pop();
-
-  const term=E('terminal-out');
-  term.innerHTML+=`<div class="t-cmd">$ ${esc(cmd)}</div>`;
-  try{
-    const d=await postJ('/api/shell',{command:cmd});
-    if(d.blocked) term.innerHTML+=`<div class="t-err">🛡 BLOCKED: ${esc(d.warning||'unsafe command')}</div>`;
-    else{
-      if(d.cwd) E('sh-in').placeholder = `local command in ${d.cwd}…`;
-      if(d.stdout) term.innerHTML+=`<div class="t-out">${esc(d.stdout)}</div>`;
-      if(d.stderr) term.innerHTML+=`<div class="t-err">${esc(d.stderr)}</div>`;
-      if(d.error)  term.innerHTML+=`<div class="t-err">Error: ${esc(d.error)}</div>`;
-      if(d.warning) term.innerHTML+=`<div style="color:var(--amber);font-size:10px">⚠ ${esc(d.warning)}</div>`;
-    }
-  }catch(e){term.innerHTML+=`<div class="t-err">Connection error: ${esc(e.message)}</div>`}
-  term.scrollTop=term.scrollHeight;
-}
-function clearTerminal(){E('terminal-out').innerHTML='<span class="t-out">Shell cleared.</span>'}
-
-// ── Optimizer tab ─────────────────────────────────────────────
-async function refreshOptimizer(){
-  try{
-    const d=await fetchJ('/api/optimizer/status');
-    if(!d.available){E('opt-status').textContent='UNAVAILABLE';return}
-    E('opt-status').textContent=d.running?'ACTIVE':'IDLE';
-    E('opt-status').style.color=d.running?'var(--ok)':'var(--dim)';
-    E('opt-steps').textContent=d.step_count||0;
-    E('opt-hlen').textContent=d.history_len||0;
-    if(d.last_error!=null) E('opt-err').textContent=(d.last_error||0).toFixed(4);
-    if(d.config){
-      E('op-eps').textContent=(d.config.epsilon||.22).toFixed(4);
-      E('op-lam').textContent=(d.config.lambda_hphi||.7).toFixed(4);
-      E('op-noise').textContent=(d.config.noise_amp||.15).toFixed(4);
-      E('op-retro').textContent=(d.config.retro_strength||.1).toFixed(4);
-    }
-    if(d.history&&d.history.length>1) drawChart(d.history);
-  }catch(e){}
-}
-
-function drawChart(data){
-  const c=E('opt-chart'), ctx=c.getContext('2d');
-  const w=c.width,h=c.height;
-  ctx.clearRect(0,0,w,h);
-  const max=Math.max(...data,.001);
-  const step=w/Math.max(1,data.length-1);
-  ctx.beginPath();
-  ctx.strokeStyle='#00f0ff';ctx.lineWidth=1.5;
-  ctx.shadowBlur=6;ctx.shadowColor='#00f0ff';
-  data.forEach((v,i)=>{
-    const x=i*step,y=h-4-(v/max)*(h-8);
-    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-  });
-  ctx.stroke();
-  // Fill
-  ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();
-  ctx.fillStyle='rgba(0,240,255,.05)';ctx.fill();
-}
-
-// ── Memory tab ────────────────────────────────────────────────
-async function recallMemory(){
-  const q=E('mem-q').value.trim(); if(!q)return;
-  try{
-    const d=await fetchJ(`/api/memory/recall?q=${enc(q)}&k=5`);
-    const res=d.results||[];
-    if(!res.length){E('mem-results').textContent='No memories found.';return}
-    E('mem-results').innerHTML=res.map((r,i)=>
-      `<div style="border-top:1px solid var(--border);padding:5px 0;font-size:10px">
-        <span style="color:var(--neon)">${i+1}.</span> ${esc(r.text||'').substring(0,200)}
-      </div>`
-    ).join('');
-  }catch(e){E('mem-results').textContent='Error: '+e.message}
-}
-
-async function clearHistory(){
-  await postJ('/api/chat/clear',{session_id:sessionId});
-  E('hist-status').textContent='Session history cleared.';
-}
-
-// ── Network info popup ────────────────────────────────────────
-async function showNetworkInfo(){
-  try{
-    const d=await fetchJ('/api/network');
-    const ifaces=Object.entries(d.interfaces||{}).map(([k,v])=>`${k}: ${v}`).join('\n');
-    alert(`Hostname: ${d.hostname}\nIP: ${d.ip}\nInterfaces:\n${ifaces}\n\nSent: ${fmtSize(d.bytes_sent)} · Recv: ${fmtSize(d.bytes_recv)}`);
-  }catch(e){}
-}
-
-async function showPiConnect(){
-  try{
-    const d=await fetchJ('/api/piconnect');
-    const nodeList=(d.nodes||[]).map(n=>`• ${n.name} (${n.ip}) [${n.status}]`).join('\n');
-    alert(`PiConnect — ${d.online} node(s) on local subnet:\n\n${nodeList}`);
-  }catch(e){}
-}
-
-async function showQR(){
-  const url=`/api/qr`;
-  const w=window.open(url,'_blank','width=300,height=300');
-  if(!w) alert(`Open: ${window.location.href.replace(/\/$/, '')}/api/qr`);
-}
-
-// ── Tab system ────────────────────────────────────────────────
-const TABS=['monitor','terminal','optimizer','memory'];
 function switchTab(name){
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',TABS[i]===name));
-  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
-  if(name==='optimizer')refreshOptimizer();
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().includes(name)));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
 }
 
-// ── Voice input ───────────────────────────────────────────────
-function toggleVoice(){
-  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
-    appendUser('[Voice requires Chrome/Edge on localhost or HTTPS]');return;
-  }
-  if(isListening){recognition&&recognition.stop();return}
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  recognition=new SR();
-  recognition.lang='en-US';recognition.continuous=false;recognition.interimResults=true;
-  recognition.onresult=e=>{
-    const t=Array.from(e.results).map(r=>r[0].transcript).join('');
-    E('prompt').value=t;
-    if(e.results[e.results.length-1].isFinal){
-      isListening=false;
-      E('voice-btn').classList.remove('listening');E('voice-btn').textContent='🎤';
-      setTimeout(()=>sendPrompt(),250);
-    }
-  };
-  recognition.onerror=recognition.onend=()=>{
-    isListening=false;E('voice-btn').classList.remove('listening');E('voice-btn').textContent='🎤';
-  };
-  recognition.start();
-  isListening=true;E('voice-btn').classList.add('listening');E('voice-btn').textContent='🔴';
-}
+function homeDir(){ return '/home/pi'; }
+function toggleFS(){ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
+function clearChat(){ E('chat-out').innerHTML = ''; }
+function showQR(){ window.open('/api/qr'); }
 
-// ── Utils ─────────────────────────────────────────────────────
-const E=id=>document.getElementById(id);
-const enc=s=>encodeURIComponent(s);
-const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-
-function fmtSize(b){
-  if(b==null)return '';
-  if(b<1024)return b+'B';
-  if(b<1048576)return(b/1024).toFixed(1)+'K';
-  if(b<1073741824)return(b/1048576).toFixed(1)+'M';
-  return(b/1073741824).toFixed(2)+'G';
-}
-function fmtUptime(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return`${h}h ${m}m`}
-function toggleFS(){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
-
-function fileIcon(name){
-  const ext=(name.split('.').pop()||'').toLowerCase();
-  const map={py:'🐍',js:'📜',ts:'📜',html:'🌐',css:'🎨',json:'📋',md:'📝',
-    txt:'📄',sh:'⚙️',bash:'⚙️',png:'🖼️',jpg:'🖼️',jpeg:'🖼️',gif:'🖼️',webp:'🖼️',
-    pdf:'📕',zip:'📦',gz:'📦',tar:'📦',log:'📃',csv:'📊',sqlite:'🗄️',db:'🗄️',
-    c:'⚡',cpp:'⚡',h:'⚡',rs:'🦀',go:'🐹',rb:'💎',toml:'⚙️',yaml:'⚙️',yml:'⚙️',
-    pth:'🧠',pt:'🧠',gguf:'🧠',mp3:'🎵',wav:'🎵',mp4:'🎬'};
-  return map[ext]||'📄';
-}
-
-async function fetchJ(url){
-  const r=await fetch(url); if(!r.ok)throw new Error('HTTP '+r.status); return r.json();
-}
-async function postJ(url,body){
-  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(body)});
-  if(!r.ok)throw new Error('HTTP '+r.status); return r.json();
-}
-
-// ── Init ──────────────────────────────────────────────────────
-(async function init(){
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.error('SW reg failed', err));
-  }
-  refreshStatus();
-  refreshNetwork();
-  refreshPiConnect();
-  setInterval(refreshStatus,3000);
-  setInterval(refreshNetwork,30000);
-  setInterval(refreshPiConnect,60000);
-  setInterval(()=>{if(E('tab-optimizer').classList.contains('active'))refreshOptimizer()},10000);
-
-  // Try /home/pi, fall back gracefully
-  try{await navTo('/home/pi')}catch(e){
-    try{await navTo('/home')}catch(e2){await navTo('/')}
-  }
-
-  E('prompt').focus();
-})();
+// Init
+setInterval(refreshStatus, 3000);
+refreshStatus();
+navTo('/home/pi');
 </script>
 </body>
 </html>

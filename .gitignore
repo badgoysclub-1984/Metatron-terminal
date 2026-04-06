@@ -7,3 +7,6 @@ logs/*.json
 venv/
 .pytest_cache/
 config/metatron_config.json
+
+build_tmp/
+*.img

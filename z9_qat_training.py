@@ -368,6 +368,27 @@ def build_dummy_data(tokenizer: SimpleTokenizer) -> torch.Tensor:
     return torch.tensor(ids, dtype=torch.long)
 
 
+def build_augmented_data(tokenizer: SimpleTokenizer) -> torch.Tensor:
+    """Build dataset from LLM-augmented synthetic data in logs."""
+    path = Path("logs/z9_augmented_data.jsonl")
+    if not path.exists():
+        log.warning(f"Augmented data not found at {path}. Falling back to dummy data.")
+        return build_dummy_data(tokenizer)
+    
+    all_text = ""
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                entry = json.loads(line)
+                all_text += f"\n--- {entry['topic']} ---\n{entry['response']}\n"
+        ids = tokenizer.encode(all_text)
+        log.info(f"Loaded {len(ids)} tokens from augmented data.")
+        return torch.tensor(ids, dtype=torch.long)
+    except Exception as e:
+        log.error(f"Error loading augmented data: {e}")
+        return build_dummy_data(tokenizer)
+
+
 # ══════════════════════════════════════════════════════════════
 # EXPORT MODELFILE (for Ollama)
 # ══════════════════════════════════════════════════════════════
@@ -400,7 +421,7 @@ def export_modelfile(
 def main():
     parser = argparse.ArgumentParser(description="Z9-QAT Transformer Trainer")
     parser.add_argument("mode", nargs="?", default="dummy",
-                        choices=["dummy", "full", "export"],
+                        choices=["dummy", "full", "export", "augmented"],
                         help="Training mode")
     parser.add_argument("--steps",  type=int, default=300,
                         help="Training steps (dummy mode)")
@@ -445,6 +466,14 @@ def main():
         trainer.train_epoch(data, steps=args.steps)
         trainer.save("z9_qat_model.pth")
         log.info("Dummy training complete.")
+
+    elif args.mode == "augmented":
+        log.info("Building dataset from augmented synthetic data…")
+        data = build_augmented_data(tokenizer)
+        log.info(f"Dataset: {len(data)} tokens")
+        trainer.train_epoch(data, steps=args.steps)
+        trainer.save("z9_qat_model.pth")
+        log.info("Augmented training complete.")
 
     elif args.mode == "full":
         try:

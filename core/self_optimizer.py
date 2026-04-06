@@ -165,11 +165,21 @@ class Z9GoldenTriadicSelfOptimizer:
 
     # ── Measurement ────────────────────────────────────────────
 
+    def _get_temperature(self) -> float:
+        """Read Raspberry Pi SoC temperature."""
+        try:
+            with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
+                temp = float(f.read().strip()) / 1000.0
+            return temp
+        except Exception:
+            return 45.0  # fallback
+
     def _measure(self) -> Dict:
         """Sample live system metrics and filter through ℤ₉."""
         cpu  = psutil.cpu_percent(interval=0.1) / 100.0
         ram  = psutil.virtual_memory().percent   / 100.0
-        disk = psutil.disk_usage("/").percent    / 100.0
+        temp = self._get_temperature()
+        temp_norm = min(max(temp - 40.0, 0.0) / 40.0, 1.0)  # 0.0 at 40C, 1.0 at 80C
 
         # LLM metrics integration
         llm_lat = 0.0
@@ -184,8 +194,7 @@ class Z9GoldenTriadicSelfOptimizer:
 
         # 6-dim raw state matching N_PARAMS
         raw = torch.tensor(
-            [cpu, ram, llm_lat, avg_err, llm_err,
-             self.config["lambda_hphi"] / 1.2],
+            [cpu, ram, llm_lat, avg_err, llm_err, temp_norm],
             dtype=torch.float32,
         )
 

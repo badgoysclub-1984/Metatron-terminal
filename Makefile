@@ -1,5 +1,5 @@
 # METATRON DESKTOP v3.1 — Makefile
-.PHONY: install run train export clean test
+.PHONY: install run train train-augmented augment export clean test
 
 install:
 	chmod +x install.sh && ./install.sh
@@ -9,6 +9,12 @@ run:
 
 train:
 	source venv/bin/activate && python z9_qat_training.py
+
+train-augmented:
+	source venv/bin/activate && python z9_qat_training.py augmented
+
+augment:
+	source venv/bin/activate && python scripts/augment_z9_data.py
 
 train-full:
 	source venv/bin/activate && python z9_qat_training.py full
