@@ -193,9 +193,11 @@ class TerminalPane(QFrame):
             self.worker = None
         self.update_status(self.node_id, "Offline")
         self.connect_btn.setText("CONNECT")
-        self.connect_btn.setStyleSheet("background: #00f0ff; color: #000; font-weight: bold; padding: 4px;")
-        try: self.connect_btn.clicked.disconnect()
-        except: pass
+        self.connect_btn.setStyleSheet("background: #ff6700; color: #000; font-weight: bold; padding: 4px;")
+        try:
+            self.connect_btn.clicked.disconnect()
+        except:
+            pass
         self.connect_btn.clicked.connect(self.show_connect_dialog)
         self.output.appendPlainText("\n--- SESSION TERMINATED ---")
 
