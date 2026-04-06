@@ -93,36 +93,54 @@ cat << 'EOF' > "$MNT_DIR/tmp/chroot_setup.sh"
 #!/bin/bash
 set -e
 export DEBIAN_FRONTEND=noninteractive
+export HOME=/home/pi
 
 # Update and install system dependencies
 apt-get update
 apt-get install -y python3-pip python3-venv git curl tesseract-ocr libtesseract-dev ffmpeg alsa-utils pulseaudio arp-scan net-tools sudo grim wtype ydotool xdotool scrot
 
+# Ensure pi is in sudoers
+usermod -aG sudo pi
+
 # Switch to 'pi' user context for Python venv
 cd /home/pi/metatron-os-v3
 sudo -u pi bash -c "python3 -m venv venv"
 sudo -u pi bash -c "source venv/bin/activate && pip install --upgrade pip"
-sudo -u pi bash -c "source venv/bin/activate && pip install flask psutil numpy requests beautifulsoup4 python-dotenv torch --index-url https://download.pytorch.org/whl/cpu"
-sudo -u pi bash -c "source venv/bin/activate && pip install faiss-cpu sentence-transformers ollama qrcode[pil] pillow pytesseract"
+sudo -u pi bash -c "source venv/bin/activate && pip install --no-cache-dir flask psutil numpy requests beautifulsoup4 python-dotenv torch --index-url https://download.pytorch.org/whl/cpu"
+sudo -u pi bash -c "source venv/bin/activate && pip install --no-cache-dir faiss-cpu sentence-transformers ollama qrcode[pil] pillow pytesseract"
 
 # Install Ollama
 curl -fsSL https://ollama.com/install.sh | sh
 
-# Pre-pull AI models (run Ollama daemon in background briefly)
+# Pre-pull AI models
+# Start Ollama in background
 ollama serve > /var/log/ollama.log 2>&1 &
 OLLAMA_PID=$!
-sleep 15 # Allow Ollama to fully start
+
+# Wait for Ollama to be ready
+echo "Waiting for Ollama to start..."
+for i in {1..30}; do
+    if ollama list >/dev/null 2>&1; then
+        echo "Ollama is ready."
+        break
+    fi
+    sleep 2
+done
 
 # Pulling models
-sudo -u pi bash -c "OLLAMA_HOST=127.0.0.1:11434 ollama pull huihui_ai/gemma3-abliterated:4b" || true
-sudo -u pi bash -c "OLLAMA_HOST=127.0.0.1:11434 ollama pull qwen2.5-coder:3b" || true
+echo "Pulling models (this may take a while)..."
+sudo -u pi bash -c "ollama pull huihui_ai/gemma3-abliterated:4b" || true
+sudo -u pi bash -c "ollama pull qwen2.5-coder:3b" || true
 
 # Generate Custom Modelfile if exists
 if [ -f "/home/pi/metatron-os-v3/Modelfile" ]; then
-    sudo -u pi bash -c "OLLAMA_HOST=127.0.0.1:11434 ollama create z9-gemma-abliterated -f /home/pi/metatron-os-v3/Modelfile" || true
+    echo "Creating custom Z9 model..."
+    sudo -u pi bash -c "ollama create z9-gemma-abliterated -f /home/pi/metatron-os-v3/Modelfile" || true
 fi
 
 kill $OLLAMA_PID || true
+# Ensure models directory is owned by pi
+chown -R pi:pi /home/pi/.ollama 2>/dev/null || true
 
 # Setup Autostart Services
 # 1. Metatron Backend systemd service
