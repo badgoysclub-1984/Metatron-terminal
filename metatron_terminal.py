@@ -82,7 +82,7 @@ class TerminalPane(QFrame):
         super().__init__(parent)
         self.node_id = node_id
         self.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
-        # NEON BLUE BORDER
+        # NEON LIGHT BLUE BORDER
         self.setStyleSheet("background: #000; border: 1px solid #00f0ff; border-radius: 4px;")
         
         layout = QVBoxLayout(self)
@@ -93,19 +93,32 @@ class TerminalPane(QFrame):
         header_layout = QHBoxLayout(self.header)
         header_layout.setContentsMargins(0, 0, 0, 0)
         
-        # NEON PURPLE STATUS
-        self.status_label = QLabel(f"Node {node_id}: Offline")
-        self.status_label.setStyleSheet("color: #bc13fe; font-weight: bold; font-size: 11px; font-family: 'Courier New';")
+        # NEON LIGHT BLUE STATUS
+        self.status_label = QLabel(f"NODE {node_id}: OFFLINE")
+        self.status_label.setStyleSheet("color: #00f0ff; font-weight: bold; font-size: 11px; font-family: 'Courier New';")
         header_layout.addWidget(self.status_label)
         
         header_layout.addStretch()
+
+        # CODE ASSIST (ACCENT BLUE)
+        self.assist_btn = QPushButton("CODE")
+        self.assist_btn.setFixedSize(50, 18)
+        self.assist_btn.setStyleSheet("font-size: 9px; background: #000; color: #00aaff; border: 1px solid #00aaff; font-weight: bold;")
+        self.assist_btn.clicked.connect(self.code_assist)
+        header_layout.addWidget(self.assist_btn)
         
         self.clear_btn = QPushButton("CLR")
         self.clear_btn.setFixedSize(40, 18)
-        # NEON ORANGE BUTTONS
-        self.clear_btn.setStyleSheet("font-size: 8px; background: #222; color: #ff6700; border: 1px solid #ff6700;")
+        self.clear_btn.setStyleSheet("font-size: 9px; background: #000; color: #00f0ff; border: 1px solid #00f0ff;")
         self.clear_btn.clicked.connect(lambda: self.output.clear())
         header_layout.addWidget(self.clear_btn)
+
+        # CONNECT BUTTON (TOP RIGHT)
+        self.connect_btn = QPushButton("CONNECT")
+        self.connect_btn.setFixedSize(80, 18)
+        self.connect_btn.setStyleSheet("font-size: 9px; background: #00f0ff; color: #000; font-weight: bold;")
+        self.connect_btn.clicked.connect(self.show_connect_dialog)
+        header_layout.addWidget(self.connect_btn)
         
         layout.addWidget(self.header)
         
@@ -115,7 +128,6 @@ class TerminalPane(QFrame):
         self.output.setFont(QFont("Monospace", 10))
         # WHITE TEXT
         self.output.setStyleSheet("background: #000; color: #ffffff; border: none;")
-        # Prevent scroll bars from inheriting weird styles
         self.output.verticalScrollBar().setStyleSheet("background: #111;")
         layout.addWidget(self.output)
         
@@ -126,28 +138,52 @@ class TerminalPane(QFrame):
         
         self.input = QLineEdit()
         # WHITE TEXT, NEON BLUE BORDER
-        self.input.setStyleSheet("background: #111; color: #ffffff; border: 1px solid #00f0ff; padding: 4px;")
+        self.input.setStyleSheet("background: #000; color: #ffffff; border: 1px solid #00f0ff; padding: 4px;")
         self.input.setPlaceholderText("Command...")
         self.input.returnPressed.connect(self.send_command)
         input_layout.addWidget(self.input)
 
-        # SEND BUTTON (NEON ORANGE)
+        # SEND BUTTON (BLACK / NEON BLUE)
         self.send_btn = QPushButton("SEND")
         self.send_btn.setFixedWidth(60)
-        self.send_btn.setStyleSheet("background: #ff6700; color: #000; font-weight: bold; padding: 4px;")
+        self.send_btn.setStyleSheet("background: #000; color: #00f0ff; border: 1px solid #00f0ff; font-weight: bold; padding: 4px;")
         self.send_btn.clicked.connect(self.send_command)
         input_layout.addWidget(self.send_btn)
-        
-        self.connect_btn = QPushButton("CONNECT")
-        self.connect_btn.setFixedWidth(100)
-        # NEON ORANGE BUTTON
-        self.connect_btn.setStyleSheet("background: #ff6700; color: #000; font-weight: bold; padding: 4px;")
-        self.connect_btn.clicked.connect(self.show_connect_dialog)
-        input_layout.addWidget(self.connect_btn)
         
         layout.addWidget(self.input_area)
         
         self.worker = None
+
+    def code_assist(self):
+        # Trigger LLM assistance based on last command or output
+        last_cmd = getattr(self, 'last_command', '')
+        if not last_cmd:
+            self.output.appendPlainText("\n[ASSIST] No command history. Type something first.")
+            return
+            
+        self.output.appendPlainText(f"\n[ASSIST] Analyzing: {last_cmd}")
+        self.status_label.setText(f"NODE {self.node_id}: ASSISTING...")
+        
+        # Run in thread to not block UI
+        threading.Thread(target=self._run_assist, args=(last_cmd,), daemon=True).start()
+
+    def _run_assist(self, cmd):
+        try:
+            from core.llm_router import Z9LLMRouter
+            router = Z9LLMRouter()
+            prompt = f"The user ran this shell command: '{cmd}'. Explain what it does, or if it failed, suggest a fix. Be extremely concise."
+            response = router.route(prompt, model="qwen_coder")
+            self.handle_assist_response.emit(response)
+        except Exception as e:
+            self.handle_assist_response.emit(f"Assist error: {str(e)}")
+
+    # We need a signal to update UI from thread
+    assist_finished = pyqtSignal(str)
+
+    def on_assist_finished(self, text):
+        self.output.appendPlainText(f"\n[METATRON-OS]: {text}")
+        self.update_status(self.node_id, "Connected" if self.worker and self.worker.running else "Offline")
+
 
     def styled_input(self, title, label, echo=QLineEdit.Normal, default=""):
         dlg = QInputDialog(self)
