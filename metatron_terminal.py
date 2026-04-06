@@ -129,8 +129,8 @@ class TerminalPane(QFrame):
         self.output = QPlainTextEdit()
         self.output.setReadOnly(True)
         self.output.setFont(QFont("Monospace", 10))
-        # WHITE TEXT ON BLACK
-        self.output.setStyleSheet("background: #000; color: #ffffff; border: none;")
+        # NEON LIGHT BLUE TEXT ON BLACK
+        self.output.setStyleSheet("background: #000; color: #00f0ff; border: none;")
         self.output.verticalScrollBar().setStyleSheet("background: #111;")
         layout.addWidget(self.output)
         
