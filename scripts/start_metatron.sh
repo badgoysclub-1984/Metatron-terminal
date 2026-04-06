@@ -29,7 +29,7 @@ done
 # Using --kiosk to force full screen and disable escape
 # --app=... to remove browser chrome
 # Added --ozone-platform=wayland for native Wayland support
-chromium-browser --kiosk --app=http://localhost:5000 \
+chromium --kiosk --app=http://localhost:5000 \
     --no-first-run --disable-infobars \
     --window-position=0,0 --window-size=1920,1080 \
     --ozone-platform=wayland \
