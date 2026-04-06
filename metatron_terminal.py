@@ -78,14 +78,14 @@ class SSHWorker(QObject):
                 pass
 
 class TerminalPane(QFrame):
-    assist_finished = pyqtSignal(str)  # SIGNAL DEFINED HERE
+    assist_finished = pyqtSignal(str)
 
     def __init__(self, node_id, parent=None):
         super().__init__(parent)
         self.node_id = node_id
-        self.last_command = ""  # TRACK LAST COMMAND
+        self.last_command = ""
         self.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
-        # NEON LIGHT BLUE BORDER
+        # BLACK / NEON BLUE THEME
         self.setStyleSheet("background: #000; border: 1px solid #00f0ff; border-radius: 4px;")
         
         layout = QVBoxLayout(self)
@@ -96,14 +96,14 @@ class TerminalPane(QFrame):
         header_layout = QHBoxLayout(self.header)
         header_layout.setContentsMargins(0, 0, 0, 0)
         
-        # NEON LIGHT BLUE STATUS
+        # NEON BLUE STATUS
         self.status_label = QLabel(f"NODE {node_id}: OFFLINE")
         self.status_label.setStyleSheet("color: #00f0ff; font-weight: bold; font-size: 11px; font-family: 'Courier New';")
         header_layout.addWidget(self.status_label)
         
         header_layout.addStretch()
 
-        # CODE ASSIST (ACCENT BLUE)
+        # CODE ASSIST (ACCENT NEON BLUE)
         self.assist_btn = QPushButton("CODE")
         self.assist_btn.setFixedSize(50, 18)
         self.assist_btn.setStyleSheet("font-size: 9px; background: #000; color: #00aaff; border: 1px solid #00aaff; font-weight: bold;")
@@ -129,7 +129,7 @@ class TerminalPane(QFrame):
         self.output = QPlainTextEdit()
         self.output.setReadOnly(True)
         self.output.setFont(QFont("Monospace", 10))
-        # WHITE TEXT
+        # WHITE TEXT ON BLACK
         self.output.setStyleSheet("background: #000; color: #ffffff; border: none;")
         self.output.verticalScrollBar().setStyleSheet("background: #111;")
         layout.addWidget(self.output)
@@ -155,41 +155,35 @@ class TerminalPane(QFrame):
         
         layout.addWidget(self.input_area)
         
-        # CONNECT SIGNAL
+        # SIGNALS
         self.assist_finished.connect(self.on_assist_finished)
         
         self.worker = None
 
     def code_assist(self):
-        # Trigger LLM assistance based on last command or output
-        last_cmd = getattr(self, 'last_command', '')
-        if not last_cmd:
+        if not self.last_command:
             self.output.appendPlainText("\n[ASSIST] No command history. Type something first.")
             return
             
-        self.output.appendPlainText(f"\n[ASSIST] Analyzing: {last_cmd}")
-        self.status_label.setText(f"NODE {self.node_id}: ASSISTING...")
-        
-        # Run in thread to not block UI
-        threading.Thread(target=self._run_assist, args=(last_cmd,), daemon=True).start()
+        self.output.appendPlainText(f"\n[ASSIST] Analyzing: {self.last_command}")
+        self.update_status(self.node_id, "ASSISTING...")
+        threading.Thread(target=self._run_assist, args=(self.last_command,), daemon=True).start()
 
     def _run_assist(self, cmd):
         try:
+            # Import inside thread to avoid startup lag
             from core.llm_router import Z9LLMRouter
             router = Z9LLMRouter()
             prompt = f"The user ran this shell command: '{cmd}'. Explain what it does, or if it failed, suggest a fix. Be extremely concise."
             response = router.route(prompt, model="qwen_coder")
-            self.handle_assist_response.emit(response)
+            self.assist_finished.emit(response)
         except Exception as e:
-            self.handle_assist_response.emit(f"Assist error: {str(e)}")
-
-    # We need a signal to update UI from thread
-    assist_finished = pyqtSignal(str)
+            self.assist_finished.emit(f"Assist error: {str(e)}")
 
     def on_assist_finished(self, text):
-        self.output.appendPlainText(f"\n[METATRON-OS]: {text}")
-        self.update_status(self.node_id, "Connected" if self.worker and self.worker.running else "Offline")
-
+        self.output.appendPlainText(f"\n[METATRON-ASSIST]: {text}")
+        status = "CONNECTED" if self.worker and self.worker.running else "OFFLINE"
+        self.update_status(self.node_id, status)
 
     def styled_input(self, title, label, echo=QLineEdit.Normal, default=""):
         dlg = QInputDialog(self)
@@ -197,18 +191,17 @@ class TerminalPane(QFrame):
         dlg.setLabelText(label)
         dlg.setTextValue(default)
         dlg.setTextEchoMode(echo)
-        # Force visibility for dark theme
-        dlg.setStyleSheet("QWidget { background-color: #111; color: #00f0ff; } QLineEdit { background-color: #222; color: #fff; border: 1px solid #00f0ff; } QPushButton { background-color: #00f0ff; color: #000; }")
+        dlg.setStyleSheet("QWidget { background-color: #000; color: #00f0ff; } QLineEdit { background-color: #111; color: #fff; border: 1px solid #00f0ff; } QPushButton { background-color: #00f0ff; color: #000; }")
         if dlg.exec_() == QInputDialog.Accepted:
             return dlg.textValue(), True
         return "", False
 
     def show_connect_dialog(self):
-        ip, ok = self.styled_input("Connect Node", "IP Address:", QLineEdit.Normal, "192.168.1.56")
+        ip, ok = self.styled_input("Connect Node", "IP Address:", default="192.168.1.56")
         if ok and ip:
-            user, ok = self.styled_input("Connect Node", "Username:", QLineEdit.Normal, "pi")
+            user, ok = self.styled_input("Connect Node", "Username:", default="pi")
             if ok and user:
-                password, ok = self.styled_input("Connect Node", "Password:", QLineEdit.Password, "Rebel23!")
+                password, ok = self.styled_input("Connect Node", "Password:", echo=QLineEdit.Password, default="Rebel23!")
                 if ok:
                     self.start_ssh(ip, user, password)
 
@@ -222,9 +215,8 @@ class TerminalPane(QFrame):
         self.worker.status_changed.connect(self.update_status)
         self.worker.start()
         
-        # UI Update
         self.connect_btn.setText("DISCONNECT")
-        self.connect_btn.setStyleSheet("background: #f00; color: #fff; font-weight: bold; padding: 4px;")
+        self.connect_btn.setStyleSheet("font-size: 9px; background: #000; color: #f00; border: 1px solid #f00; font-weight: bold;")
         try: self.connect_btn.clicked.disconnect()
         except: pass
         self.connect_btn.clicked.connect(self.stop_ssh)
@@ -233,9 +225,9 @@ class TerminalPane(QFrame):
         if self.worker:
             self.worker.stop()
             self.worker = None
-        self.update_status(self.node_id, "Offline")
+        self.update_status(self.node_id, "OFFLINE")
         self.connect_btn.setText("CONNECT")
-        self.connect_btn.setStyleSheet("background: #ff6700; color: #000; font-weight: bold; padding: 4px;")
+        self.connect_btn.setStyleSheet("font-size: 9px; background: #00f0ff; color: #000; font-weight: bold;")
         try:
             self.connect_btn.clicked.disconnect()
         except:
@@ -244,23 +236,23 @@ class TerminalPane(QFrame):
         self.output.appendPlainText("\n--- SESSION TERMINATED ---")
 
     def append_output(self, node_id, text):
-        # Basic terminal handling: normalize line endings
         text = text.replace('\r\n', '\n').replace('\r', '\n')
-        # Filter ANSI codes for clean QPlainTextEdit display
         clean_text = filter_ansi(text)
         if clean_text:
             self.output.insertPlainText(clean_text)
             self.output.moveCursor(QTextCursor.End)
 
     def update_status(self, node_id, status):
-        self.status_label.setText(f"Node {node_id}: {status}")
+        self.status_label.setText(f"NODE {node_id}: {status.upper()}")
 
     def send_command(self):
         cmd = self.input.text()
-        if self.worker:
-            self.worker.send(cmd)
-        else:
-            self.output.appendPlainText("Error: Node not connected.")
+        if cmd:
+            self.last_command = cmd
+            if self.worker:
+                self.worker.send(cmd)
+            else:
+                self.output.appendPlainText("Error: Node not connected.")
         self.input.clear()
 
 class MetatronTerminal(QMainWindow):
@@ -270,7 +262,6 @@ class MetatronTerminal(QMainWindow):
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setStyleSheet("background: rgba(1, 4, 9, 0.95);")
         
-        # Position and Size
         screen = QApplication.primaryScreen().availableGeometry()
         self.setGeometry(screen.width()//8, screen.height()//8, 1200, 800)
         
@@ -279,7 +270,6 @@ class MetatronTerminal(QMainWindow):
         self.layout = QVBoxLayout(self.central_widget)
         self.layout.setContentsMargins(2, 2, 2, 2)
         
-        # Custom Title Bar
         self.title_bar = QWidget()
         self.title_bar.setFixedHeight(35)
         self.title_bar.setStyleSheet("background: #000; border-bottom: 2px solid #00f0ff;")
@@ -305,7 +295,6 @@ class MetatronTerminal(QMainWindow):
         
         self.layout.addWidget(self.title_bar)
         
-        # Terminal Grid
         self.grid_container = QWidget()
         self.grid_layout = QGridLayout(self.grid_container)
         self.grid_layout.setSpacing(8)
@@ -319,7 +308,6 @@ class MetatronTerminal(QMainWindow):
         self.current_layout = 4
         self.update_layout()
 
-        # Draggable
         self.dragging = False
         self.drag_position = None
 
@@ -333,7 +321,6 @@ class MetatronTerminal(QMainWindow):
         self.update_layout()
 
     def update_layout(self):
-        # Clear current grid
         for i in reversed(range(self.grid_layout.count())): 
             item = self.grid_layout.itemAt(i)
             if item and item.widget():
@@ -372,7 +359,6 @@ class MetatronTerminal(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    # Ensure tooltips/dialogs don't look weird
     app.setStyle("Fusion")
     window = MetatronTerminal()
     window.show()
