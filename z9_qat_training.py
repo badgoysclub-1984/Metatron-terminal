@@ -66,8 +66,7 @@ FIB            = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233]
 
 def digital_root_9(x: torch.Tensor) -> torch.Tensor:
     """Map tensor values to ℤ₉ digital root (0..8; 9 → 0)."""
-    dr = 1 + (x - 1) % 9
-    return torch.where(dr == 9, torch.zeros_like(dr), dr)
+    return x % 9
 
 
 def fib_lr_schedule(step: int, base_lr: float = 3e-4) -> float:
@@ -128,11 +127,10 @@ class Z9QATAttention(nn.Module):
         scale   = self.d_head ** -0.5
         attn    = (q @ k.transpose(-2, -1)) * scale
 
-        # Charge-neutral masking: mask positions whose charge sum ≠ 0 (mod 9)
-        charge_mask = digital_root_9(
-            self.charge_w.sum().unsqueeze(0).unsqueeze(0).unsqueeze(0)
-        ).expand_as(attn)
-        attn = attn.masked_fill(charge_mask == 0, -1e9)
+        # Optional: Apply charge-neutral bias (theme consistency)
+        # Using mod 9 ensure it stays within Z9 domain
+        charge_bias = (self.charge_w.sum() % 9) * 0.001
+        attn = attn + charge_bias
 
         if mask is not None:
             attn = attn.masked_fill(mask == 0, -1e9)

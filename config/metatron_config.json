@@ -2,8 +2,8 @@
   "version": "3.0",
   "name": "METATRON QUANTUM OS",
   "z9": {
-    "epsilon": 0.2218043736706604,
-    "lambda_hphi": 0.6999845360537793,
+    "epsilon": 0.22714104059833345,
+    "lambda_hphi": 0.7008284108844549,
     "v9_gev": 1500.0,
     "v_ew_gev": 174.0,
     "valid_charges": [
@@ -62,8 +62,8 @@
     "d_model": 128,
     "use_cpu": true
   },
-  "noise_amp": 0.14908503102200843,
-  "retro_strength": 0.10101132260763558,
-  "recall_depth": 2.9989193176856785,
-  "d_model_scale": 0.9991954189645256
+  "noise_amp": 0.1441485692511012,
+  "retro_strength": 0.10562799616006675,
+  "recall_depth": 2.9941469944758845,
+  "d_model_scale": 0.9981069886512558
 }

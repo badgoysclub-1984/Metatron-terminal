@@ -91,6 +91,7 @@ class Z9LLMRouter:
         agent_context: Optional[Dict] = None,
         system_prompt: Optional[str] = None,
         session_id: Optional[str] = None,
+        action_idx: int = 0,
     ) -> str:
         """Route prompt → model → full text response."""
         if not self._available:
@@ -101,13 +102,16 @@ class Z9LLMRouter:
             prompt, agent_context, system_prompt, session_id
         )
 
+        # Action-aware temperature: 0=standard, 1=precise, 2=creative
+        temp = {0: 0.7, 1: 0.1, 2: 1.2}.get(action_idx, 0.7)
+
         for attempt in range(self.max_retries):
             t0 = time.time()
             try:
                 resp = self._ollama.chat(
                     model=selected,
                     messages=messages,
-                    options={"num_ctx": 4096, "temperature": 0.7},
+                    options={"num_ctx": 4096, "temperature": temp},
                 )
                 text = resp["message"]["content"]
                 lat  = time.time() - t0
@@ -134,8 +138,10 @@ class Z9LLMRouter:
         self,
         prompt: str,
         model: str = "auto",
+        agent_context: Optional[Dict] = None,
         system_prompt: Optional[str] = None,
         session_id: Optional[str] = None,
+        action_idx: int = 0,
     ) -> Generator[str, None, None]:
         """Stream tokens from Ollama model. Yields text chunks."""
         if not self._available:
@@ -143,15 +149,18 @@ class Z9LLMRouter:
             return
 
         selected = self._select_model(prompt, model)
-        messages = self._build_messages(prompt, None, system_prompt, session_id)
+        messages = self._build_messages(prompt, agent_context, system_prompt, session_id)
         full_text = []
+
+        # Action-aware temperature: 0=standard, 1=precise, 2=creative
+        temp = {0: 0.7, 1: 0.1, 2: 1.2}.get(action_idx, 0.7)
 
         try:
             for chunk in self._ollama.chat(
                 model=selected,
                 messages=messages,
                 stream=True,
-                options={"num_ctx": 4096, "temperature": 0.7},
+                options={"num_ctx": 4096, "temperature": temp},
             ):
                 text = chunk.get("message", {}).get("content", "")
                 if text:

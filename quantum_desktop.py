@@ -175,6 +175,7 @@ def create_app() -> Flask:
                     model=model,
                     agent_context=_safe_serialize(agent_result.get("result", {})),
                     session_id=session,
+                    action_idx=agent_result.get("action_index", 0),
                 )
             except Exception as exc:
                 log.warning(f"LLM error: {exc}")
@@ -210,12 +211,23 @@ def create_app() -> Flask:
         model   = request.args.get("model", "auto")
         session = request.args.get("session_id", "default")
 
+        # 1. Dispatch first to get agent context and action_idx
+        try:
+            agent_result = _dispatcher.dispatch(prompt)
+            action_idx   = agent_result.get("action_index", 0)
+            context      = _safe_serialize(agent_result.get("result", {}))
+        except Exception:
+            action_idx   = 0
+            context      = None
+
         def _gen() -> Generator[str, None, None]:
             if not _llm:
                 yield _sse({"text": "[Ollama not available]", "done": True})
                 return
             try:
-                for chunk in _llm.stream(prompt, model=model, session_id=session):
+                # Include action_idx and agent_context in stream
+                for chunk in _llm.stream(prompt, model=model, session_id=session,
+                                         agent_context=context, action_idx=action_idx):
                     yield _sse({"text": chunk, "done": False})
                 yield _sse({"text": "", "done": True})
             except Exception as exc:
@@ -267,14 +279,14 @@ def create_app() -> Flask:
         try:
             vm   = psutil.virtual_memory()
             disk = psutil.disk_usage("/")
-            cpu  = psutil.cpu_percent(interval=0.2)
+            cpu  = psutil.cpu_percent(interval=0.02)
             freq = psutil.cpu_freq()
 
             z9_snap = {
-                "epsilon":           round(_dispatcher.epsilon, 6),
-                "lambda_hphi":       round(_dispatcher.lambda_hphi, 6),
-                "task_success_rate": round(_dispatcher.task_success_rate, 4),
-                "consensus_count":   len(_dispatcher.consensus_history),
+                "epsilon":           round(getattr(_dispatcher, "epsilon", 0.22), 6),
+                "lambda_hphi":       round(getattr(_dispatcher, "lambda_hphi", 0.7), 6),
+                "task_success_rate": round(getattr(_dispatcher, "task_success_rate", 1.0), 4),
+                "consensus_count":   len(getattr(_dispatcher, "consensus_history", [])),
             }
 
             llm_snap = {}

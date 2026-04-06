@@ -10,13 +10,13 @@
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
 <style>
 :root{
-  --neon:#00f0ff;--neon-dim:#007f8a;--bg:#060c0c;--panel:#0d1616;
-  --border:#1a2828;--text:#f0ead0;--dim:#4a6868;--ok:#00ff88;--err:#ff4466;
+  --neon:#00f0ff;--neon-dim:#007f8a;--bg:rgba(0,0,0,0.95);--panel:rgba(5,5,5,0.95);
+  --border:rgba(0,240,255,0.3);--text:#00f0ff;--dim:#007f8a;--ok:var(--neon);--err:#ff4466;
   --amber:#fbbf24;--cyan:#22d3ee;--violet:#a78bfa;--green:#34d399;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;display:flex;flex-direction:column}
+html,body{height:100%;overflow:hidden;background:transparent}
+body{color:var(--text);font-family:'Courier New',monospace;display:flex;flex-direction:column}
 
 /* ── Toolbar ── */
 .toolbar{background:var(--panel);border-bottom:2px solid var(--neon);height:44px;
@@ -70,9 +70,9 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 .msg-u::before{content:"⚡ "}
 .msg-a{color:var(--text);white-space:pre-wrap;word-break:break-word}
 .msg-a::before{content:"🧿 ";color:var(--neon)}
-.msg-a code{background:#0a1a0a;color:#7fff7f;padding:1px 5px;border-radius:3px;font-size:12px}
-.msg-a pre{background:#040c04;border:1px solid #1a3020;border-radius:4px;padding:8px;
-  margin:6px 0;overflow-x:auto;font-size:11px;line-height:1.6;color:#7fff7f}
+.msg-a code{background:#001111;color:#00f0ff;padding:1px 5px;border-radius:3px;font-size:12px}
+.msg-a pre{background:#000000;border:1px solid var(--neon-dim);border-radius:4px;padding:8px;
+  margin:6px 0;overflow-x:auto;font-size:11px;line-height:1.6;color:#00f0ff}
 .msg-a pre code{background:none;padding:0;color:inherit}
 .msg-ctx{font-size:11px;border-left:2px solid var(--border);padding:3px 8px;
   margin-top:4px;color:var(--dim);border-radius:0 3px 3px 0}
@@ -127,14 +127,14 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 .sep{border:none;border-top:1px solid var(--border);margin:6px 0}
 
 /* ── Terminal ── */
-#terminal-out{flex:1;overflow-y:auto;font-size:11px;line-height:1.6;padding:6px;
-  color:#7fff7f;background:#030a03;border-radius:3px;border:1px solid #1a3020;
-  min-height:60px;max-height:320px;font-family:'Courier New',monospace}
-.t-cmd{color:#00ff88;margin-top:4px}.t-out{color:#b0d0b0}.t-err{color:#ff7788}
-#sh-in{width:100%;background:#040c04;color:var(--ok);border:1px solid #1a3020;
-  padding:5px 8px;font-family:monospace;font-size:11px;border-radius:3px;outline:none;
-  margin-top:5px}
-#sh-in:focus{border-color:#2a5030}
+.terminal-box{flex:1;overflow-y:auto;font-size:11px;line-height:1.6;padding:6px;
+  color:#00f0ff;background:#000000;border-radius:3px;border:1px solid var(--neon-dim);
+  min-height:200px;font-family:'Courier New',monospace}
+.t-cmd{color:var(--neon);margin-top:4px}.t-out{color:#007f8a}.t-err{color:#ff7788}
+.sh-in{width:100%;background:#000000;color:var(--ok);border:1px solid var(--neon-dim);
+  padding:5px 8px;font-family:monospace;font-size:11px;border-radius:3px;outline:none}
+.sh-in:focus{border-color:var(--neon)}
+.term-label{font-size:9px;color:var(--dim);margin-bottom:2px;text-transform:uppercase;letter-spacing:1px}
 
 /* ── Status bar ── */
 .status-bar{background:#040a0a;border-top:1px solid var(--border);padding:2px 10px;
@@ -346,17 +346,43 @@ Examples: "list /home/pi"  ·  "explain Z9 anomaly cancellation"
 
     <!-- Shell tab -->
     <div class="tab-pane" id="tab-terminal">
-      <div id="terminal-out">
-        <span class="t-out">METATRON Shell — Z9 SystemAgent (charge 0) · ShellGuard active</span>
-      </div>
-      <div style="display:flex;gap:4px;margin-top:5px;flex-shrink:0">
-        <input id="sh-in" placeholder="shell command…"
-               onkeydown="handleShellKey(event)">
-        <button class="btn-g btn-sm" onclick="runShell()">▶</button>
-        <button class="btn-icon btn-sm" onclick="clearTerminal()" title="Clear">✕</button>
+      <div style="display:flex;gap:10px;flex:1;min-height:0">
+        
+        <!-- LOCAL -->
+        <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+          <div class="term-label">Local Shell (charge 0)</div>
+          <div id="terminal-out" class="terminal-box">
+            <span class="t-out">METATRON Local — Z9 SystemAgent · ShellGuard active</span>
+          </div>
+          <div style="display:flex;gap:4px;margin-top:5px;flex-shrink:0">
+            <input id="sh-in" class="sh-in" placeholder="local command…"
+                   onkeydown="handleShellKey(event)">
+            <button class="btn-g btn-sm" onclick="runShell()">▶</button>
+            <button class="btn-icon btn-sm" onclick="clearTerminal()" title="Clear">✕</button>
+          </div>
+        </div>
+
+        <!-- NETWORK -->
+        <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+          <div class="term-label">Network Node (ℤ₉ Discrete Gauge)</div>
+          <div id="terminal-out-net" class="terminal-box">
+            <span class="t-out">METATRON Network — Waiting for node selection…</span>
+          </div>
+          <div style="display:flex;gap:4px;margin-top:5px;flex-shrink:0">
+            <select id="net-node-select" class="btn-sm" style="background:#000000;color:var(--dim);border:1px solid var(--neon-dim);max-width:80px;font-size:9px"
+                    onchange="updateNetTarget()">
+              <option value="">(None)</option>
+            </select>
+            <input id="sh-in-net" class="sh-in" placeholder="network command…"
+                   onkeydown="handleNetKey(event)">
+            <button class="btn-g btn-sm" onclick="runNetShell()">▶</button>
+            <button class="btn-icon btn-sm" onclick="clearNetTerminal()" title="Clear">✕</button>
+          </div>
+        </div>
+
       </div>
       <div style="font-size:10px;color:var(--dim);margin-top:3px">
-        ↑↓ history · Enter to run · ShellGuard blocks destructive commands
+        ↑↓ history · Enter to run · ShellGuard active · Connect to peers via PiConnect
       </div>
     </div>
 
@@ -398,7 +424,7 @@ Examples: "list /home/pi"  ·  "explain Z9 anomaly cancellation"
 
         <div style="color:var(--dim);font-size:10px">PERFORMANCE</div>
         <canvas id="opt-chart" width="260" height="54"
-          style="width:100%;background:#030a03;border-radius:3px;border:1px solid #1a3020"></canvas>
+          style="width:100%;background:#000000;border-radius:3px;border:1px solid var(--neon-dim)"></canvas>
 
         <button class="btn-g btn-sm" onclick="refreshOptimizer()">⟳ Refresh</button>
       </div>

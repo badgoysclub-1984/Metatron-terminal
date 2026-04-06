@@ -15,6 +15,7 @@ from agents.file_agent import FileAgent
 from agents.browser_agent import BrowserAgent
 from agents.app_agent import AppAgent
 from agents.system_agent import SystemAgent
+from agents.screen_agent import ScreenAgent
 
 D_MODEL = 128
 
@@ -32,6 +33,7 @@ class Z9AgentDispatcher:
             "browser": BrowserAgent(),
             "app":     AppAgent(),
             "system":  SystemAgent(),
+            "screen":  ScreenAgent(),
         }
         self.consensus = ChargeNeutralConsensus()
         self.consensus_history = deque(maxlen=20)
@@ -45,38 +47,26 @@ class Z9AgentDispatcher:
     def parse_intent(self, prompt: str) -> Tuple[str, Dict[str, Any]]:
         pl = prompt.lower()
 
+        # SCREEN operations
+        if "read screen" in pl or "screenshot" in pl or "ocr" in pl:
+            return "screen", {"command": "read"}
+        if "type text" in pl or "type " in pl:
+            # simple extraction: everything after "type "
+            idx = pl.find("type ")
+            if idx != -1:
+                text = prompt[idx + 5:].strip()
+                # strip potential quotes
+                if text.startswith('"') and text.endswith('"'):
+                    text = text[1:-1]
+                elif text.startswith("'") and text.endswith("'"):
+                    text = text[1:-1]
+            else:
+                text = ""
+            return "screen", {"command": "type", "text": text}
+
         # FILE operations
         if any(k in pl for k in ["file", "folder", "directory", "read", "write",
                                    "delete", "list", "ls ", "cat ", "mkdir"]):
-            path = self._extract_path(prompt) or os.getcwd()
-            if "write" in pl or "create" in pl or "save" in pl:
-                content = re.split(r"write|create|save", prompt, flags=re.I)[-1].strip()
-                return "file", {"path": path, "operation": "write", "content": content}
-            if "delete" in pl or "remove" in pl or "rm " in pl:
-                return "file", {"path": path, "operation": "delete"}
-            if "mkdir" in pl or "make dir" in pl:
-                return "file", {"path": path, "operation": "mkdir"}
-            return "file", {"path": path, "operation": "read"}
-
-        # BROWSER operations
-        if any(k in pl for k in ["browser", "web", "url", "http", "open", "fetch",
-                                   "navigate", "search online", "google"]):
-            url = self._extract_url(prompt)
-            if not url:
-                # Build Google search URL from prompt
-                query = re.sub(r"(search|google|browse|look up|fetch)", "", pl).strip()
-                url = "https://www.google.com/search?q=" + "+".join(query.split())
-            action = "fetch" if any(k in pl for k in ["fetch", "get", "scrape"]) else "open"
-            return "browser", {"url": url, "action": action}
-
-        # APP operations
-        if any(k in pl for k in ["launch", "start", "app", "open app",
-                                   "run app", "execute app"]):
-            app_name = self._extract_app_name(prompt)
-            args = self._extract_args(prompt)
-            return "app", {"app_name": app_name, "args": args}
-
-        # SYSTEM / SHELL operations
         if any(k in pl for k in ["status", "cpu", "memory", "temperature",
                                    "disk", "uptime", "processes"]):
             return "system", {"command": "__status__"}
@@ -96,20 +86,18 @@ class Z9AgentDispatcher:
         agent_name, params = self.parse_intent(prompt)
         agent = self.agents[agent_name]
 
-        # Observation vector: deterministic hash of prompt
-        obs = torch.tensor(
-            [abs(hash(prompt)) % 1000 / 1000.0] * D_MODEL, dtype=torch.float32
-        )
+        # Observation vector: distributed hash of prompt for richer state representation
+        h_str = prompt.lower().strip()
+        obs_vals = []
+        for i in range(D_MODEL):
+            val = abs(hash(f"{h_str}_{i}")) % 10000 / 10000.0
+            obs_vals.append(val)
+        obs = torch.tensor(obs_vals, dtype=torch.float32)
         action_idx = agent.act(obs)
 
         # Execute task
         result = self._execute(agent_name, agent, params)
         success = result.get("success", False)
-
-        # Charge-neutral consensus
-        self.consensus.register(agent_name, agent.charge, success)
-        consensus_record = self.consensus.commit()
-        self.consensus_history.append(consensus_record)
 
         # Retrocausal correction on failure
         if not success:
@@ -119,8 +107,15 @@ class Z9AgentDispatcher:
             result2 = self._execute(agent_name, agent, params)
             if result2.get("success", False):
                 result = result2
-                self.consensus.register(agent_name, agent.charge, True)
-                consensus_record = self.consensus.commit()
+                success = True
+
+        # Record outcome for future offline learning
+        agent.record_outcome(obs, action_idx, 1.0 if success else -1.0)
+
+        # Charge-neutral consensus (register only the final outcome)
+        self.consensus.register(agent_name, agent.charge, success)
+        consensus_record = self.consensus.commit()
+        self.consensus_history.append(consensus_record)
 
         self._update_lambda(success)
 
@@ -151,6 +146,8 @@ class Z9AgentDispatcher:
                 return agent.execute(params["url"], params.get("action", "open"))
             if agent_name == "app":
                 return agent.execute(params["app_name"], params.get("args"))
+            if agent_name == "screen":
+                return agent.execute(params.get("command", "read"), text=params.get("text", ""))
             if agent_name == "system":
                 if params.get("command") == "__status__":
                     return agent.get_status()

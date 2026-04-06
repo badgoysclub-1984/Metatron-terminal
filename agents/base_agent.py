@@ -61,7 +61,7 @@ class Z9Agent(nn.Module):
         """
         Z9-charged forward pass.
 
-        1. Scale observation by charge (coset weighting)
+        1. Scale observation by charge (coset weighting) + vacuum fluctuations (epsilon)
         2. Add learnable embedding
         3. Apply retrocausal correction
         4. Apply Fibonacci noise cancellation
@@ -69,7 +69,9 @@ class Z9Agent(nn.Module):
         6. Enforce digital-root 9 on logit sum
         """
         # Step 1-2: charge-scaled state
-        x = observation * float(self.charge) + self.embedding
+        # Charge 0 interacts via vacuum fluctuations (epsilon) to avoid observation zeroing
+        c_weight = float(self.charge) if self.charge != 0 else self.epsilon
+        x = observation * c_weight + self.embedding
 
         # Step 3-4: corrections
         x = self.retro(x, future_loss)
@@ -78,11 +80,13 @@ class Z9Agent(nn.Module):
         # Step 5: action logits
         logits = self.action_head(x)          # shape (3,)
 
-        # Step 6: digital-root enforcement
-        dr = digital_root_9(torch.sum(logits).unsqueeze(0)).item()
+        # Step 6: digital-root enforcement (ensure sum % 9 == 0)
+        s = torch.sum(logits)
+        dr = digital_root_9(s.unsqueeze(0)).item()
         if dr != 0:
             # Shift logits so their sum becomes charge-neutral
-            logits = logits - logits.mean() * (dr / 9.0)
+            # Corrected shift: subtract dr/3 from each of the 3 logits
+            logits = logits - (dr / 3.0)
 
         return logits
 

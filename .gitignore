@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.log
+*.pth
+checkpoints/
+logs/*.json
+venv/
+.pytest_cache/
