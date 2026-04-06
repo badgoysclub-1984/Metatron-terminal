@@ -2,15 +2,22 @@
 import sys
 import os
 import threading
-import queue
+import time
+import re
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QObject
 from PyQt5.QtGui import QColor, QFont, QTextCursor
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QGridLayout, QLineEdit, QPlainTextEdit, QPushButton, QLabel,
-    QSplitter, QFrame
+    QSplitter, QFrame, QInputDialog
 )
 import paramiko
+
+# ANSI Escape sequence filter
+ANSI_ESCAPE = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+
+def filter_ansi(text):
+    return ANSI_ESCAPE.sub('', text)
 
 class SSHWorker(QObject):
     output_received = pyqtSignal(str, str)  # node_id, text
@@ -38,27 +45,37 @@ class SSHWorker(QObject):
             self.client.connect(self.ip, username=self.username, password=self.password, timeout=10)
             
             self.shell = self.client.invoke_shell(term='xterm', width=80, height=24)
-            self.status_changed.emit(self.node_id, f"Connected to {self.ip}")
+            self.status_changed.emit(self.node_id, f"CONNECTED: {self.ip}")
             
             while self.running:
                 if self.shell.recv_ready():
-                    data = self.shell.recv(1024).decode('utf-8', errors='replace')
-                    if data:
-                        self.output_received.emit(self.node_id, data)
+                    data = self.shell.recv(4096)
+                    if not data:
+                        break
+                    text = data.decode('utf-8', errors='replace')
+                    self.output_received.emit(self.node_id, text)
                 else:
-                    threading.Event().wait(0.01)
+                    time.sleep(0.02)
+            
+            self.status_changed.emit(self.node_id, "Disconnected")
         except Exception as e:
             self.status_changed.emit(self.node_id, f"Error: {str(e)}")
             self.running = False
 
     def send(self, cmd):
         if self.shell and self.running:
-            self.shell.send(cmd + "\n")
+            try:
+                self.shell.send(cmd + "\n")
+            except Exception:
+                pass
 
     def stop(self):
         self.running = False
         if self.client:
-            self.client.close()
+            try:
+                self.client.close()
+            except:
+                pass
 
 class TerminalPane(QFrame):
     def __init__(self, node_id, parent=None):
@@ -76,8 +93,16 @@ class TerminalPane(QFrame):
         header_layout.setContentsMargins(0, 0, 0, 0)
         
         self.status_label = QLabel(f"Node {node_id}: Offline")
-        self.status_label.setStyleSheet("color: #00f0ff; font-weight: bold; font-size: 10px;")
+        self.status_label.setStyleSheet("color: #00f0ff; font-weight: bold; font-size: 11px; font-family: 'Courier New';")
         header_layout.addWidget(self.status_label)
+        
+        header_layout.addStretch()
+        
+        self.clear_btn = QPushButton("CLR")
+        self.clear_btn.setFixedSize(40, 18)
+        self.clear_btn.setStyleSheet("font-size: 8px; background: #222; color: #00f0ff; border: 1px solid #00f0ff;")
+        self.clear_btn.clicked.connect(lambda: self.output.clear())
+        header_layout.addWidget(self.clear_btn)
         
         layout.addWidget(self.header)
         
@@ -86,6 +111,8 @@ class TerminalPane(QFrame):
         self.output.setReadOnly(True)
         self.output.setFont(QFont("Monospace", 10))
         self.output.setStyleSheet("background: #000; color: #00f0ff; border: none;")
+        # Prevent scroll bars from inheriting weird styles
+        self.output.verticalScrollBar().setStyleSheet("background: #111;")
         layout.addWidget(self.output)
         
         # Input Area
@@ -94,13 +121,14 @@ class TerminalPane(QFrame):
         input_layout.setContentsMargins(0, 0, 0, 0)
         
         self.input = QLineEdit()
-        self.input.setStyleSheet("background: #111; color: #fff; border: 1px solid #333;")
-        self.input.setPlaceholderText("Enter command...")
+        self.input.setStyleSheet("background: #111; color: #fff; border: 1px solid #333; padding: 4px;")
+        self.input.setPlaceholderText("Command...")
         self.input.returnPressed.connect(self.send_command)
         input_layout.addWidget(self.input)
         
-        self.connect_btn = QPushButton("Connect")
-        self.connect_btn.setStyleSheet("background: #00f0ff; color: #000; font-weight: bold;")
+        self.connect_btn = QPushButton("CONNECT")
+        self.connect_btn.setFixedWidth(100)
+        self.connect_btn.setStyleSheet("background: #00f0ff; color: #000; font-weight: bold; padding: 4px;")
         self.connect_btn.clicked.connect(self.show_connect_dialog)
         input_layout.addWidget(self.connect_btn)
         
@@ -108,26 +136,42 @@ class TerminalPane(QFrame):
         
         self.worker = None
 
+    def styled_input(self, title, label, echo=QLineEdit.Normal, default=""):
+        dlg = QInputDialog(self)
+        dlg.setWindowTitle(title)
+        dlg.setLabelText(label)
+        dlg.setTextValue(default)
+        dlg.setTextEchoMode(echo)
+        # Force visibility for dark theme
+        dlg.setStyleSheet("QWidget { background-color: #111; color: #00f0ff; } QLineEdit { background-color: #222; color: #fff; border: 1px solid #00f0ff; } QPushButton { background-color: #00f0ff; color: #000; }")
+        if dlg.exec_() == QInputDialog.Accepted:
+            return dlg.textValue(), True
+        return "", False
+
     def show_connect_dialog(self):
-        # For simplicity, we'll just hardcode or use a simple prompt
-        # In a real app, this would be a dialog
-        from PyQt5.QtWidgets import QInputDialog
-        ip, ok = QInputDialog.getText(self, "Connect Node", "IP Address:", QLineEdit.Normal, "192.168.1.56")
+        ip, ok = self.styled_input("Connect Node", "IP Address:", QLineEdit.Normal, "192.168.1.56")
         if ok and ip:
-            password, ok = QInputDialog.getText(self, "Connect Node", "Password:", QLineEdit.Password, "Rebel23!")
-            if ok:
-                self.start_ssh(ip, "pi", password)
+            user, ok = self.styled_input("Connect Node", "Username:", QLineEdit.Normal, "pi")
+            if ok and user:
+                password, ok = self.styled_input("Connect Node", "Password:", QLineEdit.Password, "Rebel23!")
+                if ok:
+                    self.start_ssh(ip, user, password)
 
     def start_ssh(self, ip, username, password):
         if self.worker:
             self.worker.stop()
         
+        self.output.appendPlainText(f"--- INITIALIZING SESSION TO {ip} ---")
         self.worker = SSHWorker(self.node_id, ip, username, password)
         self.worker.output_received.connect(self.append_output)
         self.worker.status_changed.connect(self.update_status)
         self.worker.start()
-        self.connect_btn.setText("Disconnect")
-        self.connect_btn.clicked.disconnect()
+        
+        # UI Update
+        self.connect_btn.setText("DISCONNECT")
+        self.connect_btn.setStyleSheet("background: #f00; color: #fff; font-weight: bold; padding: 4px;")
+        try: self.connect_btn.clicked.disconnect()
+        except: pass
         self.connect_btn.clicked.connect(self.stop_ssh)
 
     def stop_ssh(self):
@@ -135,13 +179,21 @@ class TerminalPane(QFrame):
             self.worker.stop()
             self.worker = None
         self.update_status(self.node_id, "Offline")
-        self.connect_btn.setText("Connect")
-        self.connect_btn.clicked.disconnect()
+        self.connect_btn.setText("CONNECT")
+        self.connect_btn.setStyleSheet("background: #00f0ff; color: #000; font-weight: bold; padding: 4px;")
+        try: self.connect_btn.clicked.disconnect()
+        except: pass
         self.connect_btn.clicked.connect(self.show_connect_dialog)
+        self.output.appendPlainText("\n--- SESSION TERMINATED ---")
 
     def append_output(self, node_id, text):
-        self.output.insertPlainText(text)
-        self.output.moveCursor(QTextCursor.End)
+        # Basic terminal handling: normalize line endings
+        text = text.replace('\r\n', '\n').replace('\r', '\n')
+        # Filter ANSI codes for clean QPlainTextEdit display
+        clean_text = filter_ansi(text)
+        if clean_text:
+            self.output.insertPlainText(clean_text)
+            self.output.moveCursor(QTextCursor.End)
 
     def update_status(self, node_id, status):
         self.status_label.setText(f"Node {node_id}: {status}")
@@ -150,6 +202,8 @@ class TerminalPane(QFrame):
         cmd = self.input.text()
         if self.worker:
             self.worker.send(cmd)
+        else:
+            self.output.appendPlainText("Error: Node not connected.")
         self.input.clear()
 
 class MetatronTerminal(QMainWindow):
@@ -157,36 +211,38 @@ class MetatronTerminal(QMainWindow):
         super().__init__()
         self.setWindowTitle("🧿 METATRON TERMINAL v3.1")
         self.setWindowFlags(Qt.FramelessWindowHint)
-        self.setStyleSheet("background: rgba(1, 4, 9, 0.9);")
+        self.setStyleSheet("background: rgba(1, 4, 9, 0.95);")
         
         # Position and Size
         screen = QApplication.primaryScreen().availableGeometry()
-        self.setGeometry(screen.width()//4, screen.height()//4, 1200, 800)
+        self.setGeometry(screen.width()//8, screen.height()//8, 1200, 800)
         
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.layout = QVBoxLayout(self.central_widget)
+        self.layout.setContentsMargins(2, 2, 2, 2)
         
         # Custom Title Bar
         self.title_bar = QWidget()
-        self.title_bar.setFixedHeight(30)
-        self.title_bar.setStyleSheet("background: #000; border-bottom: 1px solid #00f0ff;")
+        self.title_bar.setFixedHeight(35)
+        self.title_bar.setStyleSheet("background: #000; border-bottom: 2px solid #00f0ff;")
         title_layout = QHBoxLayout(self.title_bar)
-        title_layout.setContentsMargins(10, 0, 10, 0)
+        title_layout.setContentsMargins(15, 0, 15, 0)
         
-        self.title_label = QLabel("METATRON MULTI-NODE TERMINAL")
-        self.title_label.setStyleSheet("color: #00f0ff; font-weight: 900; letter-spacing: 2px;")
+        self.title_label = QLabel("🧿 METATRON MULTI-NODE HIVE TERMINAL")
+        self.title_label.setStyleSheet("color: #00f0ff; font-weight: 900; letter-spacing: 3px; font-size: 14px;")
         title_layout.addWidget(self.title_label)
         
         title_layout.addStretch()
         
-        self.layout_btn = QPushButton("LAYOUT")
-        self.layout_btn.setStyleSheet("color: #00f0ff; background: transparent; border: 1px solid #00f0ff; padding: 2px 10px;")
+        self.layout_btn = QPushButton("GRID LAYOUT")
+        self.layout_btn.setStyleSheet("color: #00f0ff; background: #111; border: 1px solid #00f0ff; padding: 4px 15px; font-weight: bold;")
         self.layout_btn.clicked.connect(self.toggle_layout)
         title_layout.addWidget(self.layout_btn)
         
         self.close_btn = QPushButton("✕")
-        self.close_btn.setStyleSheet("color: #f00; background: transparent; border: none; font-size: 16px;")
+        self.close_btn.setFixedSize(30, 30)
+        self.close_btn.setStyleSheet("color: #f00; background: transparent; border: none; font-size: 20px; font-weight: bold;")
         self.close_btn.clicked.connect(self.close)
         title_layout.addWidget(self.close_btn)
         
@@ -195,7 +251,7 @@ class MetatronTerminal(QMainWindow):
         # Terminal Grid
         self.grid_container = QWidget()
         self.grid_layout = QGridLayout(self.grid_container)
-        self.grid_layout.setSpacing(10)
+        self.grid_layout.setSpacing(8)
         self.layout.addWidget(self.grid_container)
         
         self.panes = []
@@ -222,7 +278,9 @@ class MetatronTerminal(QMainWindow):
     def update_layout(self):
         # Clear current grid
         for i in reversed(range(self.grid_layout.count())): 
-            self.grid_layout.itemAt(i).widget().setParent(None)
+            item = self.grid_layout.itemAt(i)
+            if item and item.widget():
+                item.widget().setParent(None)
             
         if self.current_layout == 1:
             self.grid_layout.addWidget(self.panes[0], 0, 0)
@@ -257,6 +315,8 @@ class MetatronTerminal(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    # Ensure tooltips/dialogs don't look weird
+    app.setStyle("Fusion")
     window = MetatronTerminal()
     window.show()
     sys.exit(app.exec_())
