@@ -70,8 +70,17 @@ touch "$MNT_DIR/boot/firmware/ssh"
 
 echo "==== 6. Injecting Metatron OS Base Files ===="
 mkdir -p "$MNT_DIR/home/pi/metatron-os-v3"
-# Copy everything from current repo into the image EXCEPT the build directory
-rsync -a --exclude 'build_tmp' "$METATRON_SRC/" "$MNT_DIR/home/pi/metatron-os-v3/"
+# Copy everything from current repo into the image EXCEPT large/unnecessary files
+rsync -a \
+    --exclude 'build_tmp' \
+    --exclude 'venv' \
+    --exclude '.git' \
+    --exclude '.pytest_cache' \
+    --exclude '*.img' \
+    --exclude '*.xz' \
+    --exclude 'metatron.log' \
+    --exclude 'build.log' \
+    "$METATRON_SRC/" "$MNT_DIR/home/pi/metatron-os-v3/"
 chroot "$MNT_DIR" chown -R 1000:1000 /home/pi/metatron-os-v3
 
 echo "==== 7. Setting up Environment and Installing Dependencies (Chroot) ===="
