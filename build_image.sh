@@ -68,6 +68,10 @@ PASS_HASH=$(echo "raspberry" | openssl passwd -6 -stdin)
 echo "pi:$PASS_HASH" > "$MNT_DIR/boot/firmware/userconf.txt"
 touch "$MNT_DIR/boot/firmware/ssh"
 
+# Ensure 'pi' user exists inside chroot for setup
+chroot "$MNT_DIR" useradd -m -s /bin/bash pi || true
+echo "pi:raspberry" | chroot "$MNT_DIR" chpasswd
+
 echo "==== 6. Injecting Metatron OS Base Files ===="
 mkdir -p "$MNT_DIR/home/pi/metatron-os-v3"
 # Copy everything from current repo into the image EXCEPT large/unnecessary files
