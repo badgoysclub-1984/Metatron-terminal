@@ -85,6 +85,18 @@ def _load_config() -> Dict:
 
 CONFIG = _load_config()
 
+# ── Apps Registry ──────────────────────────────────────────────
+APPS = [
+    {"id": "terminal", "name": "Terminal", "icon": "📟", "cmd": "lxterminal", "category": "System"},
+    {"id": "files",    "name": "Files",    "icon": "📂", "cmd": "pcmanfm",    "category": "System"},
+    {"id": "browser",  "name": "Browser",  "icon": "🌐", "cmd": "chromium-browser", "category": "Web"},
+    {"id": "code",     "name": "Geany",    "icon": "📝", "cmd": "geany",      "category": "Dev"},
+    {"id": "calc",     "name": "Calc",     "icon": "🧮", "cmd": "galculator", "category": "Office"},
+    {"id": "vlc",      "name": "VLC",      "icon": "🎬", "cmd": "vlc",        "category": "Media"},
+    {"id": "taskmgr",  "name": "Tasks",    "icon": "📈", "cmd": "lxtask",     "category": "System"},
+    {"id": "metatron_term", "name": "Metatron Term", "icon": "🧿", "cmd": f"{sys.executable} metatron_terminal.py", "category": "Z9"},
+]
+
 
 # ═══════════════════════════════════════════════════════════════
 # LOGGING
