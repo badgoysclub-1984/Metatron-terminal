@@ -19,7 +19,10 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from core.llm_router import Z9LLMRouter
 
-Z9_TOPICS = [
+import random
+import string
+
+Z9_CORE_CONCEPTS = [
     "Digital Root 9 as a Gauge Symmetry",
     "Anomaly Cancellation in ℤ₉ Charge Cosets {0, 3, 6}",
     "Retrocausal Correction from Future Loss Signals",
@@ -34,7 +37,20 @@ Z9_TOPICS = [
 
 OUTPUT_FILE = "logs/z9_augmented_data.jsonl"
 
-def augment():
+def generate_random_topic():
+    concept = random.choice(Z9_CORE_CONCEPTS)
+    perspectives = [
+        "A rigorous mathematical formalization of",
+        "A python implementation guide for",
+        "Exploring the theoretical physics implications of",
+        "Performance optimization techniques regarding",
+        "The impact on computational efficiency of",
+        "An introductory tutorial on",
+        "Advanced prompt engineering leveraging"
+    ]
+    return f"{random.choice(perspectives)} {concept}"
+
+def augment(iterations=10):
     router = Z9LLMRouter()
     if not router.is_available:
         print("❌ Ollama not available. Cannot augment data.")
@@ -43,11 +59,12 @@ def augment():
     Path("logs").mkdir(exist_ok=True)
     
     print(f"🧿 Starting Z9 Data Augmentation...")
-    print(f"🎯 Target: {OUTPUT_FILE}")
+    print(f"🎯 Target: {OUTPUT_FILE} | Iterations: {iterations}")
 
     with open(OUTPUT_FILE, "a", encoding="utf-8") as f:
-        for topic in Z9_TOPICS:
-            print(f"🌀 Generating data for: {topic}...")
+        for i in range(iterations):
+            topic = generate_random_topic()
+            print(f"🌀 [{i+1}/{iterations}] Generating data for: {topic}...")
             prompt = (
                 f"Write a detailed technical explanation of '{topic}' within the context of the "
                 f"METATRON OS and ℤ₉ discrete gauge symmetry. Include mathematical definitions, "
@@ -74,7 +91,13 @@ def augment():
             # Rate limiting / Cool down
             time.sleep(2)
 
-    print(f"🧿 Augmentation complete. {len(Z9_TOPICS)} topics processed.")
+    print(f"🧿 Augmentation complete. {iterations} topics processed.")
 
 if __name__ == "__main__":
-    augment()
+    iterations = 10
+    if len(sys.argv) > 1:
+        try:
+            iterations = int(sys.argv[1])
+        except ValueError:
+            pass
+    augment(iterations)
