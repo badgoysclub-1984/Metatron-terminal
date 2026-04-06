@@ -1,7 +1,19 @@
-# 🧿 METATRON DESKTOP v3.1
+# 🧿 METATRON QUANTUM OS v3.1
 
-**ℤ₉-Powered Agentic Transformer Desktop for Raspberry Pi 500**  
+**Integrated Agentic Transformer Desktop & Terminal for Raspberry Pi 500**  
+*The official unified repository for Metatron OS (Terminal + Desktop).*
+
 Based on [arXiv:2604.XXXXX](https://arxiv.org/abs/2604.XXXXX) — *Phenomenology of a Z₉ Discrete Gauge Symmetry*
+
+---
+
+## Unified Architecture
+
+This repository contains the complete **Metatron OS** ecosystem, integrating the high-performance desktop environment and the advanced command-line terminal into a single ℤ₉-powered hive-mind.
+
+- **Metatron Desktop**: A Flask + SSE powered agentic dashboard with file browser, chat, and system monitor.
+- **Metatron Terminal**: Local and Network-capable shells protected by `ShellGuard` and ℤ₉ charge-neutral consensus.
+- **ℤ₉ Core**: Shared retrocausal, Fibonacci, and digital-root logic powering both UI and CLI.
 
 ---
 
