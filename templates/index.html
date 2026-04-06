@@ -392,6 +392,24 @@ Status: Consensus established. Ready for dispatch.
   <div style="padding: 8px 15px; cursor:pointer" onclick="ctxDelete()">Delete</div>
 </div>
 
+<div id="sidebar">
+  <div class="sidebar-header">
+    <span class="brand-text" style="font-size:16px">NEURAL ASSISTANT</span>
+    <button class="btn-g" onclick="toggleSidebar()">✕</button>
+  </div>
+  <div id="sidebar-chat">
+    <div class="msg"><div class="msg-a">Greetings. ℤ₉ Neural Assistant is ready. Use OCR to capture screen context.</div></div>
+  </div>
+  <div class="sidebar-input">
+    <input type="text" id="sb-prompt" class="prompt-input" placeholder="Neural dispatch..." 
+           onkeydown="if(event.key==='Enter')sendSbChat()">
+    <div style="display:flex; gap:8px">
+      <button class="btn-g" style="flex:1" onclick="sbOCR()">[👁] OCR SCREEN</button>
+      <button class="btn" onclick="sendSbChat()">SEND</button>
+    </div>
+  </div>
+</div>
+
 <script>
 "use strict";
 let curPath = '/home/pi';
@@ -399,6 +417,60 @@ let ctxTarget = null;
 let isBusy = false;
 let sessionId = 'session-' + Date.now();
 const E = id => document.getElementById(id);
+
+function toggleSidebar() {
+  E('sidebar').classList.toggle('open');
+}
+
+function appendSbMsg(role, text) {
+  const out = E('sidebar-chat');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.innerHTML = `<div class="msg-${role === 'user' ? 'u' : 'a'}">${text}</div>`;
+  out.appendChild(div);
+  out.scrollTop = out.scrollHeight;
+  return div.querySelector('.msg-a');
+}
+
+async function sendSbChat() {
+  const inp = E('sb-prompt');
+  const text = inp.value.trim();
+  if(!text) return;
+  inp.value = '';
+  appendSbMsg('user', text);
+  const respEl = appendSbMsg('ai', 'Thinking...');
+  try {
+    const res = await fetch('/api/execute', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ prompt: text, session_id: sessionId })
+    });
+    const d = await res.json();
+    respEl.textContent = d.llm_reply || d.result || JSON.stringify(d);
+  } catch(err) {
+    respEl.textContent = "Neural link failed: " + err;
+  }
+}
+
+async function sbOCR() {
+  appendSbMsg('user', 'ocr screen');
+  const respEl = appendSbMsg('ai', 'Performing ℤ₉ OCR Capture...');
+  try {
+    const res = await fetch('/api/execute', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ prompt: 'read screen', session_id: sessionId })
+    });
+    const d = await res.json();
+    if (d.agent_result && d.agent_result.output && d.agent_result.output.text) {
+      respEl.textContent = "Captured Screen Text:\n" + d.agent_result.output.text;
+    } else {
+      respEl.textContent = d.llm_reply || d.result || "OCR capture complete.";
+    }
+  } catch(err) {
+    respEl.textContent = "OCR Neural failure: " + err;
+  }
+}
 
 function tick(){
   const n=new Date(), p=x=>String(x).padStart(2,'0');
