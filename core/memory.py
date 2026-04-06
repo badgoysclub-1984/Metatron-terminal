@@ -67,46 +67,70 @@ class VectorMemory:
         return _text_hash_vector(text, self.dim)
 
     # ------------------------------------------------------------------
-    def add(self, text: str, metadata: Dict[str, Any]):
+    def add(self, text: str, metadata: Dict[str, Any], skip_save: bool = False):
         emb = self._encode(text)
         if self.index is not None:
             self.index.add(np.array([emb], dtype=np.float32))
         self.memories.append((emb, text, metadata))
-        if self.persist_path:
+        if self.persist_path and not skip_save:
             self._save(self.persist_path)
 
     # ------------------------------------------------------------------
     def recall(self, query: str, k: int = 3) -> List[Dict[str, Any]]:
         if not self.memories:
             return []
+        
+        # Keyword search (high-priority exact matches)
+        q_lower = query.lower()
+        exact_results = []
+        for i, (_, t, m) in enumerate(self.memories):
+            if q_lower in t.lower():
+                exact_results.append({"text": t, "metadata": m, "distance": 0.0, "index": i})
+        
+        if len(exact_results) >= k:
+            return exact_results[:k]
+
+        # Semantic search
         if self.index is not None and self.index.ntotal > 0:
             qemb = self._encode(query)
-            D, I = self.index.search(np.array([qemb], dtype=np.float32), min(k, self.index.ntotal))
-            results = []
+            # Search for more than k to filter out duplicates if needed
+            D, I = self.index.search(np.array([qemb], dtype=np.float32), min(k * 2, self.index.ntotal))
+            results = list(exact_results)
+            seen_indices = {r["index"] for r in exact_results}
+            
             for dist, idx in zip(D[0], I[0]):
-                if idx >= 0:
+                if idx >= 0 and idx not in seen_indices:
                     _, text, meta = self.memories[idx]
-                    results.append({"text": text, "metadata": meta, "distance": float(dist)})
+                    results.append({"text": text, "metadata": meta, "distance": float(dist), "index": int(idx)})
+                    seen_indices.add(idx)
+                    if len(results) >= k:
+                        break
             return results
-        # Keyword fallback
-        q_lower = query.lower()
-        return [
-            {"text": t, "metadata": m}
-            for _, t, m in self.memories
-            if q_lower in t.lower()
-        ][:k]
+        
+        return exact_results[:k]
 
     # ------------------------------------------------------------------
     def _save(self, path: Path):
         path.parent.mkdir(parents=True, exist_ok=True)
+        # Only save text and metadata, embeddings are recomputed on load or handled by FAISS
         data = [{"text": t, "metadata": m} for _, t, m in self.memories]
         path.write_text(json.dumps(data, indent=2))
 
     def _load(self, path: Path):
         try:
-            data = json.loads(path.read_text())
+            # Clear current state before loading
+            self.memories = []
+            if self.index is not None:
+                self.index.reset()
+                
+            raw_text = path.read_text()
+            if not raw_text.strip():
+                return
+            data = json.loads(raw_text)
+            print(f"[VectorMemory] Loading {len(data)} entries...")
             for entry in data:
-                self.add(entry["text"], entry.get("metadata", {}))
+                # Add without re-saving to disk
+                self.add(entry["text"], entry.get("metadata", {}), skip_save=True)
         except Exception as exc:
             print(f"[VectorMemory] Warning: could not load memories: {exc}")
 

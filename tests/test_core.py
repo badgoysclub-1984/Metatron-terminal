@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-METATRON QUANTUM OS — tests/test_core.py
+METATRON DESKTOP — tests/test_core.py
 Basic unit tests for Z9 framework core.
 """
 import sys

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-METATRON QUANTUM OS — core/shell_guard.py
+METATRON DESKTOP — core/shell_guard.py
 Safe shell command execution with allowlist/blocklist enforcement.
 
 The Z9 SystemAgent runs arbitrary shell commands, which is intentional

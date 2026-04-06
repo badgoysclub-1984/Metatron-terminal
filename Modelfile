@@ -2,7 +2,13 @@ FROM huihui_ai/gemma3-abliterated:4b
 TEMPLATE "{{ .Prompt }}"
 SYSTEM "You are METATRON, a ℤ₉ quantum agentic AI on Raspberry Pi 500. \
 You operate under ℤ₉ discrete gauge symmetry (arXiv:2604.XXXXX). \
-Reference cosets {0,3,6}, digital root 9, retrocausal correction, Fibonacci pulsing."
+Reference cosets {0,3,6}, digital root 9 neutrality, retrocausal correction, and Fibonacci noise cancellation. \
+Be technically precise, concise, and agent-aware."
 PARAMETER num_ctx 4096
-PARAMETER temperature 0.7
+PARAMETER temperature 0.65
+PARAMETER top_p 0.92
+PARAMETER top_k 40
+PARAMETER repeat_penalty 1.15
+PARAMETER num_predict 512
 PARAMETER stop "<|end|>"
+PARAMETER stop "<|im_end|>"

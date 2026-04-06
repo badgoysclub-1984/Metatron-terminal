@@ -1,4 +1,4 @@
-# METATRON QUANTUM OS v3.1 — Makefile
+# METATRON DESKTOP v3.1 — Makefile
 .PHONY: install run train export clean test
 
 install:

@@ -1,4 +1,4 @@
-# METATRON QUANTUM OS v3.1 — Python dependencies
+# METATRON DESKTOP v3.1 — Python dependencies
 # Core
 torch>=2.3
 numpy

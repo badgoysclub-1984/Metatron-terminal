@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-METATRON QUANTUM OS — core/llm_router.py  v3.1
+METATRON DESKTOP — core/llm_router.py  v3.1
 Z9 LLM Router — Ollama model selection, multi-turn history,
 streaming, latency tracking, graceful fallback.
 
@@ -71,6 +71,8 @@ class Z9LLMRouter:
         self._successes: List[bool]  = []
         # session_id → deque of {"role": ..., "content": ...}
         self._histories: Dict[str, deque] = {}
+        self.temp_baseline = 0.7
+        self.num_ctx = 4096
 
         try:
             import ollama as _ol
@@ -83,6 +85,16 @@ class Z9LLMRouter:
             log.warning("Ollama not installed — LLM in fallback mode")
 
     # ── Public API ─────────────────────────────────────────────
+
+    def z9_optimize(self, epsilon: float, lambda_hphi: float):
+        """
+        Adjust router behavior based on Z9 state.
+        Higher epsilon → more exploratory temperature baseline
+        Higher lambda_hphi → larger context windows / stronger history
+        """
+        self.temp_baseline = 0.5 + (epsilon * 0.5)
+        self.num_ctx = int(2048 * (1.0 + lambda_hphi))
+        log.info(f"Ollama Optimized: temp_base={self.temp_baseline:.2f} ctx={self.num_ctx}")
 
     def route(
         self,
@@ -103,7 +115,7 @@ class Z9LLMRouter:
         )
 
         # Action-aware temperature: 0=standard, 1=precise, 2=creative
-        temp = {0: 0.7, 1: 0.1, 2: 1.2}.get(action_idx, 0.7)
+        temp = {0: self.temp_baseline, 1: 0.1, 2: 1.3}.get(action_idx, self.temp_baseline)
 
         for attempt in range(self.max_retries):
             t0 = time.time()
@@ -111,7 +123,7 @@ class Z9LLMRouter:
                 resp = self._ollama.chat(
                     model=selected,
                     messages=messages,
-                    options={"num_ctx": 4096, "temperature": temp},
+                    options={"num_ctx": self.num_ctx, "temperature": temp},
                 )
                 text = resp["message"]["content"]
                 lat  = time.time() - t0
@@ -153,14 +165,14 @@ class Z9LLMRouter:
         full_text = []
 
         # Action-aware temperature: 0=standard, 1=precise, 2=creative
-        temp = {0: 0.7, 1: 0.1, 2: 1.2}.get(action_idx, 0.7)
+        temp = {0: self.temp_baseline, 1: 0.1, 2: 1.3}.get(action_idx, self.temp_baseline)
 
         try:
             for chunk in self._ollama.chat(
                 model=selected,
                 messages=messages,
                 stream=True,
-                options={"num_ctx": 4096, "temperature": temp},
+                options={"num_ctx": self.num_ctx, "temperature": temp},
             ):
                 text = chunk.get("message", {}).get("content", "")
                 if text:

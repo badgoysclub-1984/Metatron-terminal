@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-METATRON QUANTUM OS — core/z9_constants.py
+METATRON DESKTOP — core/z9_constants.py
 Shared ℤ₉ framework constants (arXiv:2604.XXXXX)
 """
 

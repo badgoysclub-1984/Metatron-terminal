@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-METATRON QUANTUM OS v3.1 — quantum_desktop.py
+METATRON DESKTOP v3.1 — quantum_desktop.py
 Master Flask Backend
 
 ℤ₉ Agentic Transformer Desktop for Raspberry Pi 500
@@ -68,7 +68,7 @@ CONFIG_PATH = Path("config/metatron_config.json")
 def _load_config() -> Dict:
     defaults = {
         "version":  "3.1",
-        "name":     "METATRON QUANTUM OS",
+        "name":     "METATRON DESKTOP",
         "z9":       {"epsilon": 0.22, "lambda_hphi": 0.7, "v9_gev": 1500.0},
         "web_ui":   {"host": "0.0.0.0", "port": 5000},
         "pi":       {"d_model": 128, "use_cpu": True},
@@ -117,7 +117,7 @@ def create_app() -> Flask:
     _dispatcher = Z9AgentDispatcher()
     _memory     = VectorMemory(persist_path=_mem_path)
     _llm        = Z9LLMRouter()                       if _HAS_LLM else None
-    _optimizer  = Z9GoldenTriadicSelfOptimizer()      if _HAS_OPT else None
+    _optimizer  = Z9GoldenTriadicSelfOptimizer(llm_router=_llm) if _HAS_OPT else None
 
     if _optimizer:
         _optimizer.start()
@@ -743,7 +743,7 @@ if __name__ == "__main__":
         shutil.copy(default, CONFIG_PATH)
 
     log.info("=" * 60)
-    log.info("  METATRON QUANTUM OS v3.1")
+    log.info("  METATRON DESKTOP v3.1")
     log.info("  ℤ₉ Agentic Transformer Desktop — Raspberry Pi 500")
     log.info(f"  ε = {CONFIG['z9']['epsilon']}  λ = {CONFIG['z9']['lambda_hphi']}")
     log.info("=" * 60)
@@ -759,4 +759,4 @@ if __name__ == "__main__":
     try:
         app.run(host=host, port=port, debug=False, threaded=True)
     except KeyboardInterrupt:
-        log.info("Shutting down METATRON QUANTUM OS…")
+        log.info("Shutting down METATRON DESKTOP…")

@@ -1,10 +1,10 @@
 #!/bin/bash
-# METATRON QUANTUM OS v3.1 — One-click installer for Raspberry Pi 500
+# METATRON DESKTOP v3.1 — One-click installer for Raspberry Pi 500
 # Usage: chmod +x install.sh && ./install.sh
 set -e
 
 echo "╔══════════════════════════════════════════════════════════╗"
-echo "║      METATRON QUANTUM OS v3.1 — Installer               ║"
+echo "║      METATRON DESKTOP v3.1 — Installer               ║"
 echo "║      ℤ₉ Agentic Transformer Desktop · Raspberry Pi 500   ║"
 echo "╚══════════════════════════════════════════════════════════╝"
 echo ""
@@ -79,7 +79,7 @@ fi
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════╗"
-echo "║  ✅  METATRON QUANTUM OS v3.1 installed successfully!    ║"
+echo "║  ✅  METATRON DESKTOP v3.1 installed successfully!    ║"
 echo "╠══════════════════════════════════════════════════════════╣"
 echo "║  Run:  source venv/bin/activate                          ║"
 echo "║        python quantum_desktop.py                         ║"

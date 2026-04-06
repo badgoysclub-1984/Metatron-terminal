@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-METATRON QUANTUM OS — core/self_optimizer.py
+METATRON DESKTOP — core/self_optimizer.py
 Z9 Golden Triadic Hive-Mind Self-Optimizer
 
 Architecture:
@@ -19,7 +19,7 @@ import threading
 import time
 from collections import deque
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
@@ -104,10 +104,12 @@ class Z9GoldenTriadicSelfOptimizer:
         config_path: str = "config/metatron_config.json",
         interval_sec: float = 8.0,
         lr: float = 0.004,
+        llm_router: Optional[Any] = None,
     ):
         self.config_path   = Path(config_path)
         self.interval_sec  = interval_sec
         self.lr            = lr
+        self.llm_router    = llm_router
 
         self.config        = self._load_config()
         self.masters: Dict[int, GoldenTriadicMasterOperator] = {
@@ -169,13 +171,20 @@ class Z9GoldenTriadicSelfOptimizer:
         ram  = psutil.virtual_memory().percent   / 100.0
         disk = psutil.disk_usage("/").percent    / 100.0
 
+        # LLM metrics integration
+        llm_lat = 0.0
+        llm_err = 0.0
+        if self.llm_router:
+            llm_lat = min(self.llm_router.avg_latency / 60.0, 1.0)
+            llm_err = 1.0 - self.llm_router.success_rate
+
         n = len(self.performance_history)
         recent = list(self.performance_history)[-20:]
         avg_err = sum(recent) / len(recent) if recent else 0.0
 
         # 6-dim raw state matching N_PARAMS
         raw = torch.tensor(
-            [cpu, ram, disk, avg_err, float(n) / 500.0,
+            [cpu, ram, llm_lat, avg_err, llm_err,
              self.config["lambda_hphi"] / 1.2],
             dtype=torch.float32,
         )
@@ -244,6 +253,13 @@ class Z9GoldenTriadicSelfOptimizer:
                 self.config[key] = self.config.get(key, 0.0) + delta
             self._clamp()
             self._save_config()
+
+            # Apply Z9 optimization to Ollama router if present
+            if self.llm_router:
+                self.llm_router.z9_optimize(
+                    self.config["epsilon"],
+                    self.config["lambda_hphi"]
+                )
 
         log.debug(
             f"Step {self.step_count} | err={metrics['error_proxy']:.4f} | "

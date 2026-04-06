@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-METATRON QUANTUM OS — z9_qat_training.py
+METATRON DESKTOP — z9_qat_training.py
 Z9-QAT (Quantisation-Aware Training) Transformer Module
 
 Trains a compact ℤ₉-constrained transformer locally on the Pi 500.
@@ -349,7 +349,7 @@ class Z9QATTrainer:
 # ══════════════════════════════════════════════════════════════
 
 Z9_TEXT = """
-METATRON QUANTUM OS — ℤ₉ Agentic OS for Raspberry Pi 500.
+METATRON DESKTOP — ℤ₉ Agentic OS for Raspberry Pi 500.
 Based on Z9 discrete gauge symmetry (arXiv:2604.XXXXX).
 The three charge cosets {0, 3, 6} satisfy anomaly cancellation.
 Digital root 9 enforces charge neutrality: dr(x) = 1 + (x-1) mod 9.

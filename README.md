@@ -1,4 +1,4 @@
-# 🧿 METATRON QUANTUM OS v3.1
+# 🧿 METATRON DESKTOP v3.1
 
 **ℤ₉-Powered Agentic Transformer Desktop for Raspberry Pi 500**  
 Based on [arXiv:2604.XXXXX](https://arxiv.org/abs/2604.XXXXX) — *Phenomenology of a Z₉ Discrete Gauge Symmetry*
