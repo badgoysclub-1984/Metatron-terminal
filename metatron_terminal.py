@@ -82,6 +82,7 @@ class TerminalPane(QFrame):
         super().__init__(parent)
         self.node_id = node_id
         self.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
+        # NEON BLUE BORDER
         self.setStyleSheet("background: #000; border: 1px solid #00f0ff; border-radius: 4px;")
         
         layout = QVBoxLayout(self)
@@ -92,15 +93,17 @@ class TerminalPane(QFrame):
         header_layout = QHBoxLayout(self.header)
         header_layout.setContentsMargins(0, 0, 0, 0)
         
+        # NEON PURPLE STATUS
         self.status_label = QLabel(f"Node {node_id}: Offline")
-        self.status_label.setStyleSheet("color: #00f0ff; font-weight: bold; font-size: 11px; font-family: 'Courier New';")
+        self.status_label.setStyleSheet("color: #bc13fe; font-weight: bold; font-size: 11px; font-family: 'Courier New';")
         header_layout.addWidget(self.status_label)
         
         header_layout.addStretch()
         
         self.clear_btn = QPushButton("CLR")
         self.clear_btn.setFixedSize(40, 18)
-        self.clear_btn.setStyleSheet("font-size: 8px; background: #222; color: #00f0ff; border: 1px solid #00f0ff;")
+        # NEON ORANGE BUTTONS
+        self.clear_btn.setStyleSheet("font-size: 8px; background: #222; color: #ff6700; border: 1px solid #ff6700;")
         self.clear_btn.clicked.connect(lambda: self.output.clear())
         header_layout.addWidget(self.clear_btn)
         
@@ -110,7 +113,8 @@ class TerminalPane(QFrame):
         self.output = QPlainTextEdit()
         self.output.setReadOnly(True)
         self.output.setFont(QFont("Monospace", 10))
-        self.output.setStyleSheet("background: #000; color: #00f0ff; border: none;")
+        # WHITE TEXT
+        self.output.setStyleSheet("background: #000; color: #ffffff; border: none;")
         # Prevent scroll bars from inheriting weird styles
         self.output.verticalScrollBar().setStyleSheet("background: #111;")
         layout.addWidget(self.output)
@@ -121,14 +125,23 @@ class TerminalPane(QFrame):
         input_layout.setContentsMargins(0, 0, 0, 0)
         
         self.input = QLineEdit()
-        self.input.setStyleSheet("background: #111; color: #fff; border: 1px solid #333; padding: 4px;")
+        # WHITE TEXT, NEON BLUE BORDER
+        self.input.setStyleSheet("background: #111; color: #ffffff; border: 1px solid #00f0ff; padding: 4px;")
         self.input.setPlaceholderText("Command...")
         self.input.returnPressed.connect(self.send_command)
         input_layout.addWidget(self.input)
+
+        # SEND BUTTON (NEON ORANGE)
+        self.send_btn = QPushButton("SEND")
+        self.send_btn.setFixedWidth(60)
+        self.send_btn.setStyleSheet("background: #ff6700; color: #000; font-weight: bold; padding: 4px;")
+        self.send_btn.clicked.connect(self.send_command)
+        input_layout.addWidget(self.send_btn)
         
         self.connect_btn = QPushButton("CONNECT")
         self.connect_btn.setFixedWidth(100)
-        self.connect_btn.setStyleSheet("background: #00f0ff; color: #000; font-weight: bold; padding: 4px;")
+        # NEON ORANGE BUTTON
+        self.connect_btn.setStyleSheet("background: #ff6700; color: #000; font-weight: bold; padding: 4px;")
         self.connect_btn.clicked.connect(self.show_connect_dialog)
         input_layout.addWidget(self.connect_btn)
         
