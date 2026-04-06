@@ -139,6 +139,13 @@ def create_app() -> Flask:
     # UI
     # ─────────────────────────────────────────────────────────
 
+    @app.route("/sw.js")
+    def service_worker():
+        from flask import send_from_directory
+        response = send_from_directory("static", "sw.js", mimetype="application/javascript")
+        response.headers['Cache-Control'] = 'no-cache'
+        return response
+
     @app.route("/")
     def index():
         return render_template("index.html")
@@ -163,7 +170,8 @@ def create_app() -> Flask:
         try:
             agent_result = _dispatcher.dispatch(prompt)
         except Exception as exc:
-            log.error(f"Dispatch error: {exc}")
+            import traceback
+            log.error(f"Dispatch error: {exc}\n{traceback.format_exc()}")
             agent_result = {"error": str(exc), "agent": "unknown", "charge": 0}
 
         # 2. LLM response

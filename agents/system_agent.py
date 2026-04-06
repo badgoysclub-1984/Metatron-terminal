@@ -6,6 +6,7 @@ Executes shell commands, reports system metrics.
 Uses ShellGuard for safe command execution.
 """
 
+import os
 import subprocess
 import logging
 from typing import Any, Dict, Optional
@@ -23,15 +24,50 @@ class SystemAgent(Z9Agent):
 
     def __init__(self):
         super().__init__(name="SystemAgent", charge=0)
+        self.cwd = os.path.expanduser("~")
 
     def execute(self, command: str, timeout: int = 30) -> Dict[str, Any]:
         """Run a shell command via ShellGuard and return structured output."""
         if not command or command == "__status__":
             return self.get_status()
 
-        log.info(f"SystemAgent exec: {command!r}")
-        result = run_safe(command, timeout=timeout)
+        log.info(f"SystemAgent exec: {command!r} in {self.cwd}")
+        
+        # Handle cd commands to maintain state
+        if command.strip().startswith("cd "):
+            target_dir = command.strip()[3:].strip()
+            target_dir = os.path.expanduser(target_dir)
+            if not os.path.isabs(target_dir):
+                target_dir = os.path.join(self.cwd, target_dir)
+            target_dir = os.path.normpath(target_dir)
+            
+            if os.path.isdir(target_dir):
+                self.cwd = target_dir
+                return {
+                    "success": True,
+                    "stdout": f"Changed directory to {self.cwd}",
+                    "stderr": "",
+                    "returncode": 0,
+                    "blocked": False,
+                    "warning": None,
+                    "command": command
+                }
+            else:
+                return {
+                    "success": False,
+                    "stdout": "",
+                    "stderr": f"cd: {target_dir}: No such file or directory",
+                    "returncode": 1,
+                    "blocked": False,
+                    "warning": None,
+                    "command": command
+                }
+
+        result = run_safe(command, timeout=timeout, cwd=self.cwd)
         result["success"] = result["success"] and not result["blocked"]
+        
+        # Add the current working directory to the output so UI knows where it is
+        result["cwd"] = self.cwd
         return result
 
     def get_status(self) -> Dict[str, Any]:

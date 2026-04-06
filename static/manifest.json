@@ -1,0 +1,21 @@
+{
+  "name": "METATRON QUANTUM OS",
+  "short_name": "Metatron",
+  "description": "ℤ₉ Agentic OS Terminal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060c0c",
+  "theme_color": "#00f0ff",
+  "icons": [
+    {
+      "src": "/api/qr?data=metatron_icon",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/api/qr?data=metatron_icon",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
