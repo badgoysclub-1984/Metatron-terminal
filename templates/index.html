@@ -247,10 +247,10 @@ body{color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",H
          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendPrompt()}">
   
   <div style="display:flex; gap: 8px">
-    <button id="voice-btn" class="btn-g" onclick="toggleVoice()" title="Voice input">🎤</button>
+    <button id="voice-btn" class="btn-g" onclick="toggleVoice()" title="Voice input">🎤 VOICE</button>
     <label style="cursor:pointer" title="Upload file">
       <input type="file" id="file-upload" style="display:none" onchange="uploadFile(this)">
-      <span class="btn-g">📤</span>
+      <span class="btn-g">📤 UPLOAD</span>
     </label>
     <button id="send-btn" class="btn" onclick="sendPrompt()">DISPATCH → ℤ₉</button>
   </div>
@@ -264,9 +264,9 @@ body{color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",H
     <div class="ph">
       <span>📁 ARCHIVE</span>
       <div style="display:flex;gap:5px;align-items:center">
-        <button class="btn-g" style="padding:2px 6px" onclick="navTo(homeDir())">⌂</button>
-        <button class="btn-g" style="padding:2px 6px" onclick="refreshFiles()">⟳</button>
-        <button class="btn-g" style="padding:2px 6px" onclick="newFile()">+📄</button>
+        <button class="btn-g" style="padding:2px 6px" onclick="navTo(homeDir())">HOME</button>
+        <button class="btn-g" style="padding:2px 6px" onclick="refreshFiles()">REFRESH</button>
+        <button class="btn-g" style="padding:2px 6px" onclick="newFile()">+FILE</button>
       </div>
     </div>
     <div id="bc" style="padding: 6px 12px; font-size: 11px; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(0,240,255,0.1)">…</div>
