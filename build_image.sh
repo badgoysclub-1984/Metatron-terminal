@@ -38,10 +38,10 @@ if [ ! -f "$FINAL_IMG" ]; then
     xz -d -c "$IMAGE_XZ" > "$FINAL_IMG"
 fi
 
-echo "==== 3. Expanding Image for AI Models (Adding 16GB) ===="
+echo "==== 3. (Skipping) Expanding Image for AI Models (Already 22GB) ===="
 # 16GB is enough for Ollama models + PyTorch + future expansion
-dd if=/dev/zero bs=1M count=16000 >> "$FINAL_IMG"
-parted "$FINAL_IMG" resizepart 2 100%
+# dd if=/dev/zero bs=1M count=16000 >> "$FINAL_IMG"
+# parted "$FINAL_IMG" resizepart 2 100%
 
 echo "==== 4. Setting up Loopback & Mounting ===="
 LOOP_DEV=$(losetup -P -f --show "$FINAL_IMG")
