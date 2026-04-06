@@ -299,6 +299,30 @@ def create_app() -> Flask:
         return jsonify({"cleared": True, "session_id": session})
 
     # ─────────────────────────────────────────────────────────
+    # APPS
+    # ─────────────────────────────────────────────────────────
+
+    @app.route("/api/apps/list")
+    def apps_list():
+        return jsonify({"apps": APPS})
+
+    @app.route("/api/apps/launch", methods=["POST"])
+    def apps_launch():
+        data = request.get_json(force=True, silent=True) or {}
+        app_id = data.get("id")
+        app_item = next((a for a in APPS if a["id"] == app_id), None)
+        if not app_item:
+            return jsonify({"error": "App not found"}), 404
+        
+        try:
+            # Use subprocess to launch in background
+            log.info(f"Launching app: {app_item['name']} ({app_item['cmd']})")
+            subprocess.Popen(app_item["cmd"], shell=True, start_new_session=True)
+            return jsonify({"success": True, "name": app_item["name"]})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    # ─────────────────────────────────────────────────────────
     # SYSTEM STATUS
     # ─────────────────────────────────────────────────────────
 
