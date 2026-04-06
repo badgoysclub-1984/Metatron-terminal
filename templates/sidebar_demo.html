@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metatron Sidebar Demo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+:root {
+  --neon:#00f0ff;--neon-dim:rgba(0, 240, 255, 0.3);--bg:#0d1117;--panel:#161b22;
+  --border:#30363d;--text:#c9d1d9;--dim:#8b949e;--github-black: #010409;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body {
+  height:100%;overflow:hidden;
+  background-image: radial-gradient(circle at center, #0d1117 0%, #010409 100%);
+  color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+}
+
+/* ── Typography & Accents ── */
+.brand-text {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  background: linear-gradient(90deg, #fff, var(--neon), #fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  font-weight: 900;
+}
+
+.btn {
+  background:var(--neon);color:#000;border:none;padding:8px 20px;border-radius:4px;
+  cursor:pointer;font-weight:800;font-size:13px;transition:all .2s;
+  box-shadow: 0 0 15px rgba(0,240,255,0.3);
+}
+.btn:hover{filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 0 20px rgba(0,240,255,0.5)}
+.btn-g {
+  background:transparent;color:var(--neon);border:1px solid var(--neon-dim);
+  padding:6px 12px;border-radius:4px;cursor:pointer;font-size:11px;transition:all .2s;
+}
+.btn-g:hover{border-color:var(--neon);background:rgba(0,240,255,.1);box-shadow: 0 0 10px rgba(0,240,255,0.2)}
+
+/* ── Sidebar Specific ── */
+#sidebar {
+  position: fixed; top: 0; right: -400px; width: 400px; height: 100%;
+  background: rgba(2,10,10,0.95); border-left: 1px solid var(--neon-dim);
+  box-shadow: -10px 0 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,240,255,0.03);
+  backdrop-filter: blur(10px); transition: right 0.3s ease-in-out;
+  display: flex; flex-direction: column; z-index: 100;
+}
+#sidebar.open { right: 0; }
+
+.sidebar-header {
+  background:linear-gradient(to right, #051515, #000); border-bottom:1px solid var(--border);
+  padding:15px 20px; display:flex; align-items:center; justify-content:space-between;
+  color: var(--neon); font-weight: 800; letter-spacing: 0.5px;
+}
+
+/* ── Chat Messages ── */
+#chat-out {
+  flex: 1; overflow-y: auto; padding: 15px 20px; font-size: 14px; line-height: 1.7; scroll-behavior: smooth;
+  background-image: radial-gradient(circle at 10% 10%, #051515 0%, #000000 100%);
+}
+.msg { margin-bottom:15px; animation: slideUp .25s ease-out; }
+@keyframes slideUp { from{opacity:0; transform: translateY(10px)} to{opacity:1; transform: translateY(0)} }
+.msg-u { color:var(--neon); font-size:14px; margin-bottom:5px; font-weight: 700; text-shadow: 0 0 5px rgba(0,240,255,0.4); }
+.msg-u::before{content:"[USER] "; opacity: 0.7;}
+.msg-a { color:var(--text); white-space:pre-wrap; word-break:break-word; border-left: 2px solid var(--neon-dim); padding-left: 12px; }
+.msg-a::before{content:"[METATRON] "; color:var(--neon); font-weight: 900;}
+
+/* ── Chat Input ── */
+.input-bar {
+  background:rgba(2,5,5,0.95); border-top:1px solid var(--border);
+  padding:15px; display:flex; flex-direction:column; gap:10px;
+}
+.prompt-input {
+  width: 100%; background:#000; color:var(--text); border:1px solid var(--neon-dim);
+  border-radius:4px; padding:10px 16px; font-size:14px; outline:none;
+  transition:all .3s ease; box-shadow: inset 0 0 10px rgba(0,240,255,0.05);
+}
+.prompt-input:focus { border-color:var(--neon); box-shadow:0 0 15px rgba(0,240,255,0.2), inset 0 0 5px rgba(0,240,255,0.1); }
+.controls { display: flex; gap: 10px; justify-content: space-between; }
+
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar {width: 6px; height: 6px}
+::-webkit-scrollbar-track {background: #000}
+::-webkit-scrollbar-thumb {background: var(--neon-dim); border-radius: 3px;}
+::-webkit-scrollbar-thumb:hover {background: var(--neon)}
+
+/* ── Demo Main Page ── */
+.main-content {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; text-align: center; gap: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="main-content">
+  <h1 class="brand-text" style="font-size: 3rem;">Metatron OS</h1>
+  <p style="color: var(--dim);">Prototype: Sidebar Chatbot with OCR</p>
+  <button class="btn" onclick="toggleSidebar()">Toggle Chatbot</button>
+</div>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <span class="brand-text" style="font-size: 1.2rem;">METATRON CHAT</span>
+    <button class="btn-g" style="padding: 2px 8px; font-size: 14px;" onclick="toggleSidebar()">✕</button>
+  </div>
+  
+  <div id="chat-out">
+    <div class="msg"><div class="msg-a">Greetings. I am the Metatron sidebar assistant. Use the button below to read the current screen.</div></div>
+  </div>
+
+  <div class="input-bar">
+    <input type="text" id="prompt" class="prompt-input" placeholder="Enter command or chat..." onkeydown="if(event.key==='Enter') sendChat()">
+    <div class="controls">
+      <button class="btn-g" onclick="readScreen()">[👁] OCR Screen</button>
+      <button class="btn" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let sessionId = "sidebar-" + Math.random().toString(36).substr(2, 9);
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  function appendMsg(role, text) {
+    const out = document.getElementById('chat-out');
+    const div = document.createElement('div');
+    div.className = 'msg';
+    const inner = document.createElement('div');
+    inner.className = role === 'user' ? 'msg-u' : 'msg-a';
+    inner.textContent = text;
+    div.appendChild(inner);
+    out.appendChild(div);
+    out.scrollTop = out.scrollHeight;
+    
+    // Attempt KaTeX render if needed
+    try { renderMathInElement(inner, {delimiters: [{left:"$$", right:"$$", display:true}, {left:"$", right:"$", display:false}]}); } catch(e){}
+    return inner;
+  }
+
+  async function sendChat() {
+    const inp = document.getElementById('prompt');
+    const text = inp.value.trim();
+    if(!text) return;
+    inp.value = '';
+    
+    appendMsg('user', text);
+    const respEl = appendMsg('ai', '...');
+    
+    try {
+      const res = await fetch('/api/execute', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ prompt: text, model: 'huihui_ai/gemma3-abliterated:4b', session_id: sessionId })
+      });
+      const data = await res.json();
+      respEl.textContent = data.result || JSON.stringify(data);
+      try { renderMathInElement(respEl, {delimiters: [{left:"$$", right:"$$", display:true}, {left:"$", right:"$", display:false}]}); } catch(e){}
+    } catch(err) {
+      respEl.textContent = "Error communicating with Metatron Core: " + err;
+    }
+  }
+
+  async function readScreen() {
+    appendMsg('user', 'read screen');
+    const respEl = appendMsg('ai', 'Capturing screen and performing OCR...');
+    
+    try {
+      const res = await fetch('/api/execute', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ prompt: 'read screen', model: 'huihui_ai/gemma3-abliterated:4b', session_id: sessionId })
+      });
+      const data = await res.json();
+      respEl.textContent = data.result || JSON.stringify(data);
+      
+      // If the backend returns a raw text payload instead of a formulated 'result', try to display that nicely
+      if (typeof data === 'object' && data.text) {
+         respEl.textContent = "OCR Text found:\n" + data.text;
+      }
+    } catch(err) {
+      respEl.textContent = "OCR failed: " + err;
+    }
+  }
+</script>
+</body>
+</html>
