@@ -79,11 +79,11 @@ def benchmark_llm_inference():
         # Ping ollama
         resp = requests.post("http://localhost:11434/api/generate", 
                              json={
-                                 "model": "huihui_ai/gemma3-abliterated:4b", 
+                                 "model": "qwen2.5-coder:3b", 
                                  "prompt": "Why is 9 a sacred number in Metatron OS?",
                                  "stream": False,
                                  "options": {"num_predict": 50}
-                             }, timeout=60)
+                             }, timeout=120)
         end = time.perf_counter()
         
         if resp.status_code == 200:
