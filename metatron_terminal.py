@@ -78,9 +78,12 @@ class SSHWorker(QObject):
                 pass
 
 class TerminalPane(QFrame):
+    assist_finished = pyqtSignal(str)  # SIGNAL DEFINED HERE
+
     def __init__(self, node_id, parent=None):
         super().__init__(parent)
         self.node_id = node_id
+        self.last_command = ""  # TRACK LAST COMMAND
         self.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
         # NEON LIGHT BLUE BORDER
         self.setStyleSheet("background: #000; border: 1px solid #00f0ff; border-radius: 4px;")
@@ -151,6 +154,9 @@ class TerminalPane(QFrame):
         input_layout.addWidget(self.send_btn)
         
         layout.addWidget(self.input_area)
+        
+        # CONNECT SIGNAL
+        self.assist_finished.connect(self.on_assist_finished)
         
         self.worker = None
 
