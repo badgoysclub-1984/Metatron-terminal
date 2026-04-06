@@ -150,6 +150,10 @@ def create_app() -> Flask:
     def index():
         return render_template("index.html")
 
+    @app.route("/sidebar")
+    def sidebar_page():
+        return render_template("sidebar_demo.html")
+
     @app.route("/terminal")
     def terminal_page():
         return render_template("terminal.html")
