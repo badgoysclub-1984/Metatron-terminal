@@ -310,8 +310,15 @@ Status: Consensus established. Ready for dispatch.
     <div class="tab-bar">
       <div class="tab-btn active" onclick="switchTab('monitor')">Monitor</div>
       <div class="tab-btn" onclick="switchTab('terminal')">Shell</div>
+      <div class="tab-btn" onclick="switchTab('apps')">Apps</div>
       <div class="tab-btn" onclick="switchTab('optimizer')">Z9-Opt</div>
       <div class="tab-btn" onclick="switchTab('memory')">Memory</div>
+    </div>
+...
+    <div class="tab-pane" id="tab-apps" style="padding: 15px; flex:1; display:flex; flex-direction:column; overflow-y:auto">
+        <div id="apps-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+          <!-- Apps dynamic -->
+        </div>
     </div>
 
     <!-- Monitor tab -->
