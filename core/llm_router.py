@@ -20,9 +20,9 @@ log = logging.getLogger("metatron.llm")
 
 # ── Model registry ─────────────────────────────────────────────
 MODELS = {
-    "gemma_abl":  "huihui_ai/gemma3-abliterated:4b",
+    "gemma_abl":  "gemma2:2b",
     "qwen_coder": "qwen2.5-coder:3b",
-    "deepseek":   "deepseek-coder-v2:lite",
+    "deepseek":   "qwen2.5:1.5b",
     "metatron":   "z9-gemma-abliterated",   # custom Modelfile variant
 }
 
