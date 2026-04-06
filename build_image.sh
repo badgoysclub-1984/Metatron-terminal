@@ -83,7 +83,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 # Update and install system dependencies
 apt-get update
-apt-get install -y python3-pip python3-venv git curl tesseract-ocr libtesseract-dev ffmpeg alsa-utils pulseaudio arp-scan net-tools sudo
+apt-get install -y python3-pip python3-venv git curl tesseract-ocr libtesseract-dev ffmpeg alsa-utils pulseaudio arp-scan net-tools sudo grim wtype ydotool xdotool scrot
 
 # Switch to 'pi' user context for Python venv
 cd /home/pi/metatron-os-v3

@@ -63,6 +63,18 @@ class Z9AgentDispatcher:
             else:
                 text = ""
             return "screen", {"command": "type", "text": text}
+        if "click" in pl and "right" in pl:
+            return "screen", {"command": "right_click"}
+        if "double" in pl and "click" in pl:
+            return "screen", {"command": "double_click"}
+        if "click" in pl:
+            return "screen", {"command": "click"}
+        if "move mouse" in pl or "move " in pl:
+            # try to extract x y
+            nums = [int(s) for s in pl.split() if s.isdigit()]
+            if len(nums) >= 2:
+                return "screen", {"command": f"move {nums[0]} {nums[1]}"}
+            return "screen", {"command": "move 0 0"}
 
         # FILE operations
         if any(k in pl for k in ["file", "folder", "directory", "read", "write",
