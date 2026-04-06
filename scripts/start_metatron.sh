@@ -25,13 +25,13 @@ for i in {1..30}; do
     sleep 1
 done
 
-# 3. Launch UI in Chromium Kiosk Mode (Hardlocked)
-# Using --kiosk to force full screen and disable escape
+# 3. Launch UI in Chromium (Standard Mode)
+# Removed --kiosk to allow window management
 # --app=... to remove browser chrome
 # Added --ozone-platform=wayland for native Wayland support
-chromium --kiosk --app=http://localhost:5000 \
+chromium --app=http://localhost:5000 \
     --no-first-run --disable-infobars \
-    --window-position=0,0 --window-size=1920,1080 \
+    --window-position=100,100 --window-size=1280,720 \
     --ozone-platform=wayland \
     --enable-features=UseOzonePlatform \
     > logs/chromium.log 2>&1 &
