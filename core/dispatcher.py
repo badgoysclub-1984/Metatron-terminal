@@ -16,6 +16,7 @@ from agents.browser_agent import BrowserAgent
 from agents.app_agent import AppAgent
 from agents.system_agent import SystemAgent
 from agents.screen_agent import ScreenAgent
+from agents.doc_agent import DocAgent
 
 D_MODEL = 128
 
@@ -34,6 +35,7 @@ class Z9AgentDispatcher:
             "app":     AppAgent(),
             "system":  SystemAgent(),
             "screen":  ScreenAgent(),
+            "doc":     DocAgent(),
         }
         self.consensus = ChargeNeutralConsensus()
         self.consensus_history = deque(maxlen=20)
@@ -117,6 +119,13 @@ class Z9AgentDispatcher:
             cmd = re.split(r"shell|command|run|execute|bash", prompt, flags=re.I)[-1].strip()
             return "system", {"command": cmd or prompt}
 
+        # DOCUMENT operations
+        if any(k in pl for k in ["pdf", "extract doc", "convert doc", "read pdf"]):
+            path = self._extract_path(prompt) or os.getcwd()
+            fmt = "json" if "json" in pl else "markdown"
+            hybrid = "hybrid" in pl or "ocr" in pl
+            return "doc", {"path": path, "operation": "convert", "format": fmt, "hybrid": hybrid}
+
         # Default: treat whole prompt as a shell command
         return "system", {"command": prompt}
 
@@ -184,6 +193,13 @@ class Z9AgentDispatcher:
                 return agent.execute(params["app_name"], params.get("args"))
             if agent_name == "screen":
                 return agent.execute(params.get("command", "read"), text=params.get("text", ""))
+            if agent_name == "doc":
+                return agent.execute(
+                    params["path"],
+                    params.get("operation", "convert"),
+                    params.get("format", "markdown"),
+                    params.get("hybrid", False)
+                )
             if agent_name == "system":
                 if params.get("command") == "__status__":
                     return agent.get_status()

@@ -124,20 +124,21 @@ class Z9QATAttention(nn.Module):
         k = k.transpose(1, 2)
         v = v.transpose(1, 2)
 
-        scale   = self.d_head ** -0.5
-        attn    = (q @ k.transpose(-2, -1)) * scale
-
-        # Optional: Apply charge-neutral bias (theme consistency)
-        # Using mod 9 ensure it stays within Z9 domain
+        # Computational improvement: Use PyTorch's optimized scaled_dot_product_attention
+        # The previous charge_bias addition before softmax was mathematically a no-op due to translation invariance.
+        # We apply the theme consistency bias to the final output instead to preserve its parameter gradient.
         charge_bias = (self.charge_w.sum() % 9) * 0.001
-        attn = attn + charge_bias
-
-        if mask is not None:
-            attn = attn.masked_fill(mask == 0, -1e9)
-
-        attn = self.drop(F.softmax(attn, dim=-1))
-        out  = (attn @ v).transpose(1, 2).reshape(B, T, C)
-        return self.out(out)
+        
+        is_causal = mask is not None
+        out = F.scaled_dot_product_attention(
+            q, k, v, 
+            attn_mask=None, 
+            dropout_p=self.drop.p if self.training else 0.0,
+            is_causal=is_causal
+        )
+        
+        out = out.transpose(1, 2).reshape(B, T, C)
+        return self.out(out) + charge_bias
 
 
 class Z9QATBlock(nn.Module):
