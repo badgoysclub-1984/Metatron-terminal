@@ -52,7 +52,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     
     // SSH Library for real-time terminal access
-    implementation("com.github.mwiede:jsch:0.2.16")
+    implementation("com.jcraft:jsch:0.1.55")
     
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     
