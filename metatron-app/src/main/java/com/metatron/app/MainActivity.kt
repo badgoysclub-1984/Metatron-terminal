@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = DeepBlack
                 ) {
-                    SSHMetatronTerminal()
+                    GeminiTerminalApp()
                 }
             }
         }
@@ -83,17 +83,17 @@ fun MetatronZ9Theme(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun SSHMetatronTerminal() {
+fun GeminiTerminalApp() {
     val coroutineScope = rememberCoroutineScope()
     var prompt by remember { mutableStateOf("") }
-    val terminalLines = remember { mutableStateListOf<String>("ℤ₉ METATRON TERMINAL v2.0 READY...", "Waiting for SSH connection to 192.168.1.56...") }
+    val terminalLines = remember { mutableStateListOf<String>("🧿 METATRON Z9: INITIALIZING QUANTUM LINK...") }
     
     // SSH State
     var session by remember { mutableStateOf<Session?>(null) }
     var outputStream by remember { mutableStateOf<OutputStream?>(null) }
-    var channel by remember { mutableStateOf<ChannelShell?>(null) }
+    var isConnected by remember { mutableStateOf(false) }
 
-    // Auto-connect to Pi (hardcoded for now to facilitate fast deployment)
+    // Persistent SSH Connection
     LaunchedEffect(Unit) {
         coroutineScope.launch(Dispatchers.IO) {
             try {
@@ -101,66 +101,74 @@ fun SSHMetatronTerminal() {
                 val newSession = jsch.getSession("badgoysclub", "192.168.1.56", 22)
                 newSession.setPassword("Rebel23!")
                 newSession.setConfig("StrictHostKeyChecking", "no")
-                newSession.connect(10000)
+                newSession.connect(15000)
                 
-                val newChannel = newSession.openChannel("shell") as ChannelShell
-                newChannel.connect()
+                val channel = newSession.openChannel("shell") as ChannelShell
+                channel.setPty(true)
+                channel.connect()
                 
                 session = newSession
-                channel = newChannel
-                outputStream = newChannel.outputStream
-                val inputStream = newChannel.inputStream
+                outputStream = channel.outputStream
+                val inputStream = channel.inputStream
+                isConnected = true
 
                 withContext(Dispatchers.Main) {
-                    terminalLines.add("--- CONNECTED TO ℤ₉ BACKEND ---")
+                    terminalLines.add("--- LINK ESTABLISHED: badgoysclub@192.168.1.56 ---")
                 }
 
-                // Listener for incoming shell data
-                val buffer = ByteArray(4096)
-                while (newChannel.isConnected) {
+                val buffer = ByteArray(8192)
+                while (channel.isConnected) {
                     if (inputStream.available() > 0) {
-                        val i = inputStream.read(buffer, 0, 4096)
-                        if (i < 0) break
-                        val response = String(buffer, 0, i)
-                        withContext(Dispatchers.Main) {
-                            terminalLines.add(response.trim())
+                        val length = inputStream.read(buffer)
+                        if (length > 0) {
+                            val cleanResponse = String(buffer, 0, length)
+                                .replace("\r\n", "\n")
+                                .replace("\r", "\n")
+                            
+                            withContext(Dispatchers.Main) {
+                                // Simple logic to avoid flooding the UI with identical lines or echoes
+                                if (cleanResponse.isNotBlank()) {
+                                    terminalLines.add(cleanResponse.trimEnd())
+                                }
+                            }
                         }
                     }
-                    delay(50)
+                    delay(30)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    terminalLines.add("CONNECTION ERROR: ${e.message}")
+                    terminalLines.add("CONNECTION FAILED: ${e.message}")
                 }
             }
         }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Header
+        // App Title
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(top = 12.dp, bottom = 8.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "ℤ₉ AGENTIC OS",
+                text = "ℤ₉ GEMINI TERMINAL",
                 color = NeonBlue,
-                style = MaterialTheme.typography.headlineSmall.copy(
+                style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 4.sp
+                    letterSpacing = 2.sp
                 )
             )
         }
 
-        // Terminal Window
-        TerminalOutputWindow(terminalLines)
+        // Terminal Window (Output)
+        TerminalWindow(terminalLines)
 
-        // Prompt Bar (Chatbot style)
-        PromptBar(
+        // Prompt Bar (Input)
+        ChatbotPromptBar(
             value = prompt,
             onValueChange = { prompt = it },
+            enabled = isConnected,
             onSend = {
                 if (prompt.isNotBlank()) {
                     val cmd = prompt
@@ -170,7 +178,7 @@ fun SSHMetatronTerminal() {
                             outputStream?.flush()
                         } catch (e: Exception) {
                             withContext(Dispatchers.Main) {
-                                terminalLines.add("SEND ERROR: ${e.message}")
+                                terminalLines.add("SYSTEM ERROR: ${e.message}")
                             }
                         }
                     }
@@ -182,7 +190,7 @@ fun SSHMetatronTerminal() {
 }
 
 @Composable
-fun ColumnScope.TerminalOutputWindow(lines: List<String>) {
+fun ColumnScope.TerminalWindow(lines: List<String>) {
     val listState = rememberLazyListState()
     
     LaunchedEffect(lines.size) {
@@ -195,10 +203,10 @@ fun ColumnScope.TerminalOutputWindow(lines: List<String>) {
         modifier = Modifier
             .weight(1f)
             .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .border(1.dp, NeonBlue.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+            .background(DarkGrey.copy(alpha = 0.5f))
             .padding(8.dp)
-            .border(1.dp, NeonBlue.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-            .background(DarkGrey, RoundedCornerShape(8.dp))
-            .padding(12.dp)
     ) {
         LazyColumn(
             state = listState,
@@ -209,8 +217,8 @@ fun ColumnScope.TerminalOutputWindow(lines: List<String>) {
                     text = line,
                     color = NeonBlue,
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(vertical = 1.dp)
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp
                 )
             }
         }
@@ -218,10 +226,11 @@ fun ColumnScope.TerminalOutputWindow(lines: List<String>) {
 }
 
 @Composable
-fun PromptBar(
+fun ChatbotPromptBar(
     value: String,
     onValueChange: (String) -> Unit,
-    onSend: () -> Unit
+    onSend: () -> Unit,
+    enabled: Boolean
 ) {
     Row(
         modifier = Modifier
@@ -234,26 +243,28 @@ fun PromptBar(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .height(56.dp)
-                .border(1.dp, NeonBlue, RoundedCornerShape(28.dp))
-                .background(DarkGrey, RoundedCornerShape(28.dp))
+                .height(52.dp)
+                .border(1.dp, if (enabled) NeonBlue else Color.Gray, RoundedCornerShape(26.dp))
+                .background(DarkGrey, RoundedCornerShape(26.dp))
                 .padding(horizontal = 20.dp),
             contentAlignment = Alignment.CenterStart
         ) {
             if (value.isEmpty()) {
                 Text(
-                    text = "Execute Z9 command...",
-                    color = NeonBlue.copy(alpha = 0.5f),
-                    fontFamily = FontFamily.Monospace
+                    text = if (enabled) "Message Gemini CLI..." else "Connecting...",
+                    color = NeonBlue.copy(alpha = 0.4f),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 14.sp
                 )
             }
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
+                enabled = enabled,
                 textStyle = TextStyle(
                     color = NeonBlue,
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 16.sp
+                    fontSize = 15.sp
                 ),
                 cursorBrush = SolidColor(NeonBlue),
                 modifier = Modifier.fillMaxWidth(),
@@ -261,13 +272,14 @@ fun PromptBar(
             )
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(10.dp))
 
         IconButton(
             onClick = onSend,
+            enabled = enabled,
             modifier = Modifier
-                .size(56.dp)
-                .background(NeonBlue, RoundedCornerShape(28.dp))
+                .size(52.dp)
+                .background(if (enabled) NeonBlue else Color.Gray, RoundedCornerShape(26.dp))
         ) {
             Icon(
                 imageVector = Icons.Default.Send,
