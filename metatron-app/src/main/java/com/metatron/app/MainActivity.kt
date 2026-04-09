@@ -6,30 +6,24 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jcraft.jsch.ChannelShell
@@ -39,7 +33,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.InputStream
 import java.io.OutputStream
 import java.util.regex.Pattern
 
@@ -75,9 +68,9 @@ fun MetatronZ9Theme(content: @Composable () -> Unit) {
         typography = Typography(
             bodyLarge = TextStyle(
                 fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Normal,
                 fontSize = 12.sp,
-                lineHeight = 16.sp
+                lineHeight = 15.sp
             )
         ),
         content = content
@@ -120,29 +113,28 @@ fun SetupScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("ℤ₉ NODE CONFIGURATION", color = NeonBlue, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold)
-        Spacer(modifier = Modifier.height(40.dp))
+        Text("ℤ₉ NODE SETUP", color = NeonBlue, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold)
+        Spacer(modifier = Modifier.height(32.dp))
         
         OutlinedTextField(value = host, onValueChange = onHostChange, label = { Text("HOST IP") }, modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(value = port, onValueChange = onPortChange, label = { Text("PORT") }, modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(12.dp))
-        OutlinedTextField(value = user, onValueChange = onUserChange, label = { Text("USER") }, modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(value = user, onValueChange = onUserChange, label = { Text("USERNAME") }, modifier = Modifier.fillMaxWidth())
+        Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
-            value = pass, onValueChange = onPassChange, label = { Text("CREDENTIAL") },
+            value = pass, onValueChange = onPassChange, label = { Text("PASSWORD") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
         
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(40.dp))
         Button(
             onClick = onEstablish,
-            modifier = Modifier.fillMaxWidth().height(60.dp),
-            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = NeonBlue, contentColor = DeepBlack)
         ) {
-            Text("INITIATE SECURE LINK", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            Text("ESTABLISH QUANTUM LINK", fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -151,13 +143,13 @@ fun SetupScreen(
 @Composable
 fun TerminalInterface(host: String, user: String, pass: String, port: Int, onExit: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
-    val clipboardManager = LocalClipboardManager.current
-    var terminalText by remember { mutableStateOf("🧿 METATRON v4.0: CONNECTING...\n") }
+    var terminalContent by remember { mutableStateOf(TextFieldValue("🧿 METATRON v5.0: CONNECTING...\n")) }
     var prompt by remember { mutableStateOf("") }
     var isConnected by remember { mutableStateOf(false) }
     var outputStream by remember { mutableStateOf<OutputStream?>(null) }
     
-    val ansiPattern = Pattern.compile("\\x1B\\[[0-9;]*[a-zA-Z]")
+    // Improved ANSI stripping regex
+    val ansiPattern = Pattern.compile("\\x1B\\[[0-9;]*[a-zA-Z]|\\x1B\\(B|\\x1B\\)")
 
     LaunchedEffect(Unit) {
         coroutineScope.launch(Dispatchers.IO) {
@@ -166,18 +158,20 @@ fun TerminalInterface(host: String, user: String, pass: String, port: Int, onExi
                 val session = jsch.getSession(user, host, port)
                 session.setPassword(pass)
                 session.setConfig("StrictHostKeyChecking", "no")
-                session.connect(20000)
+                session.connect(30000)
                 
                 val channel = session.openChannel("shell") as ChannelShell
                 channel.setPty(true)
-                channel.setEnv("TERM", "xterm")
+                channel.setPtyType("vt100", 80, 24, 0, 0)
                 channel.connect()
                 
                 outputStream = channel.outputStream
                 val inputStream = channel.inputStream
                 isConnected = true
 
-                withContext(Dispatchers.Main) { terminalText += "--- SECURE LINK ACTIVE ---\n" }
+                withContext(Dispatchers.Main) { 
+                    terminalContent = terminalContent.copy(text = terminalContent.text + "--- LINK ESTABLISHED ---\n")
+                }
 
                 val buffer = ByteArray(16384)
                 while (channel.isConnected) {
@@ -185,45 +179,42 @@ fun TerminalInterface(host: String, user: String, pass: String, port: Int, onExi
                         val read = inputStream.read(buffer)
                         if (read > 0) {
                             val raw = String(buffer, 0, read)
+                            // Deep filter for ANSI escape codes
                             val clean = ansiPattern.matcher(raw).replaceAll("")
                                 .replace("\r\n", "\n")
                                 .replace("\r", "")
                             
                             withContext(Dispatchers.Main) {
-                                terminalText += clean
-                                if (terminalText.length > 50000) {
-                                    terminalText = terminalText.takeLast(30000)
-                                }
+                                val newText = terminalContent.text + clean
+                                // Keep buffer capped at 100k chars for performance
+                                terminalContent = TextFieldValue(
+                                    text = if (newText.length > 100000) newText.takeLast(80000) else newText
+                                )
                             }
                         }
                     }
-                    delay(40)
+                    delay(30)
                 }
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) { terminalText += "\n[ERROR] CONNECTION TERMINATED: ${e.message}\n" }
+                withContext(Dispatchers.Main) { 
+                    terminalContent = terminalContent.copy(text = terminalContent.text + "\n[SYSTEM] CONNECTION FAILED: ${e.message}\n")
+                }
             }
         }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
-            title = { Text("ℤ₉ GEMINI TERMINAL", color = NeonBlue, fontSize = 16.sp, fontWeight = FontWeight.Bold) },
+            title = { Text("ℤ₉ GEMINI TERMINAL PRO", color = NeonBlue, fontSize = 14.sp, fontWeight = FontWeight.Bold) },
             actions = {
-                IconButton(onClick = { clipboardManager.setText(AnnotatedString(terminalText)) }) {
-                    Icon(Icons.Default.Share, contentDescription = "Copy All", tint = NeonBlue)
-                }
                 IconButton(onClick = onExit) {
-                    Icon(Icons.Default.Settings, contentDescription = "Setup", tint = NeonBlue)
+                    Icon(Icons.Default.Settings, contentDescription = "Config", tint = NeonBlue)
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = DeepBlack)
         )
 
-        val scrollState = rememberScrollState()
-        LaunchedEffect(terminalText) {
-            scrollState.animateScrollTo(scrollState.maxValue)
-        }
-
+        // READ-ONLY TEXTFIELD for native selection/copying
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -232,19 +223,22 @@ fun TerminalInterface(host: String, user: String, pass: String, port: Int, onExi
                 .border(1.dp, NeonBlue.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
                 .background(Color.Black)
         ) {
-            SelectionContainer {
-                Text(
-                    text = terminalText,
+            BasicTextField(
+                value = terminalContent,
+                onValueChange = { /* Read only, but allow selection */ },
+                readOnly = true,
+                textStyle = TextStyle(
                     color = NeonBlue,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(12.dp)
-                        .verticalScroll(scrollState)
-                )
-            }
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp
+                ),
+                cursorBrush = SolidColor(Color.Transparent),
+                modifier = Modifier.fillMaxSize().padding(8.dp)
+            )
         }
 
+        // Chatbot Input Bar
         Row(
             modifier = Modifier.fillMaxWidth().padding(12.dp).navigationBarsPadding().imePadding(),
             verticalAlignment = Alignment.CenterVertically
@@ -258,10 +252,10 @@ fun TerminalInterface(host: String, user: String, pass: String, port: Int, onExi
                     .padding(horizontal = 20.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
-                if (prompt.isEmpty()) Text(if (isConnected) "Enter command..." else "Reconnecting...", color = NeonBlue.copy(alpha = 0.3f))
+                if (prompt.isEmpty()) Text(if (isConnected) "Message Gemini CLI..." else "Connecting...", color = NeonBlue.copy(alpha = 0.3f), fontSize = 14.sp)
                 BasicTextField(
                     value = prompt, onValueChange = { prompt = it }, enabled = isConnected,
-                    textStyle = TextStyle(color = NeonBlue, fontFamily = FontFamily.Monospace, fontSize = 14.sp),
+                    textStyle = TextStyle(color = NeonBlue, fontFamily = FontFamily.Monospace, fontSize = 15.sp),
                     cursorBrush = SolidColor(NeonBlue), modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send)
                 )
